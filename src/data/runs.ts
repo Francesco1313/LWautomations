@@ -1,0 +1,196 @@
+export interface Step {
+  type: 'trigger' | 'action' | 'completion' | 'branch'
+  label: string
+  outcome: 'success' | 'failed'
+  branchPath?: 'yes' | 'no'
+  errorMessage: string | null
+  timestamp: string
+}
+
+export interface Run {
+  id: string
+  userId: string
+  userName: string
+  userEmail: string
+  enrolledAt: string
+  triggerEvent: string
+  reentryRule: string
+  status: 'completed' | 'in_progress' | 'failed' | 'exited'
+  steps: Step[]
+}
+
+export const runs: Run[] = [
+  {
+    id: 'run-001',
+    userId: 'user-001',
+    userName: 'Alice Rossi',
+    userEmail: 'alice.rossi@example.com',
+    enrolledAt: '2026-01-05T09:00:00Z',
+    triggerEvent: 'User signs up',
+    reentryRule: 'Once per user',
+    status: 'completed',
+    steps: [
+      { type: 'trigger', label: 'User signs up', outcome: 'success', errorMessage: null, timestamp: '2026-01-05T09:00:00Z' },
+      { type: 'action', label: 'Send welcome email', outcome: 'success', errorMessage: null, timestamp: '2026-01-05T09:01:00Z' },
+      { type: 'action', label: 'Add to newsletter tag', outcome: 'success', errorMessage: null, timestamp: '2026-01-05T09:01:05Z' },
+      { type: 'branch', label: 'Branch', outcome: 'success', branchPath: 'yes', errorMessage: null, timestamp: '2026-01-05T09:01:08Z' },
+      { type: 'completion', label: 'Automation completed', outcome: 'success', errorMessage: null, timestamp: '2026-01-05T09:01:10Z' },
+    ],
+  },
+  {
+    id: 'run-002',
+    userId: 'user-002',
+    userName: 'Marco Bianchi',
+    userEmail: 'marco.bianchi@example.com',
+    enrolledAt: '2026-01-08T14:00:00Z',
+    triggerEvent: 'User signs up',
+    reentryRule: 'Once per user',
+    status: 'failed',
+    steps: [
+      { type: 'trigger', label: 'User signs up', outcome: 'success', errorMessage: null, timestamp: '2026-01-08T14:00:00Z' },
+      { type: 'action', label: 'Send welcome email', outcome: 'failed', errorMessage: 'SMTP connection timed out after 30 seconds. Email provider may be unavailable.', timestamp: '2026-01-08T14:01:00Z' },
+      { type: 'action', label: 'Add to newsletter tag', outcome: 'failed', errorMessage: 'Previous step failed; action skipped.', timestamp: '2026-01-08T14:01:05Z' },
+    ],
+  },
+  {
+    id: 'run-003',
+    userId: 'user-003',
+    userName: 'Sofia Esposito',
+    userEmail: 'sofia.esposito@example.com',
+    enrolledAt: '2026-01-12T10:30:00Z',
+    triggerEvent: 'User signs up',
+    reentryRule: 'Once per user',
+    status: 'completed',
+    steps: [
+      { type: 'trigger', label: 'User signs up', outcome: 'success', errorMessage: null, timestamp: '2026-01-12T10:30:00Z' },
+      { type: 'action', label: 'Send welcome email', outcome: 'success', errorMessage: null, timestamp: '2026-01-12T10:31:00Z' },
+      { type: 'action', label: 'Wait 3 days', outcome: 'success', errorMessage: null, timestamp: '2026-01-15T10:31:00Z' },
+      { type: 'action', label: 'Add to newsletter tag', outcome: 'success', errorMessage: null, timestamp: '2026-01-15T10:31:05Z' },
+      { type: 'branch', label: 'Branch', outcome: 'failed', branchPath: 'no', errorMessage: null, timestamp: '2026-01-15T10:31:08Z' },
+      { type: 'completion', label: 'Automation completed', outcome: 'success', errorMessage: null, timestamp: '2026-01-15T10:31:10Z' },
+    ],
+  },
+  {
+    id: 'run-004',
+    userId: 'user-001',
+    userName: 'Alice Rossi',
+    userEmail: 'alice.rossi@example.com',
+    enrolledAt: '2026-01-20T16:00:00Z',
+    triggerEvent: 'Course completed',
+    reentryRule: 'Once per course',
+    status: 'in_progress',
+    steps: [
+      { type: 'trigger', label: 'Course completed', outcome: 'success', errorMessage: null, timestamp: '2026-01-20T16:00:00Z' },
+      { type: 'action', label: 'Award completion badge', outcome: 'success', errorMessage: null, timestamp: '2026-01-20T16:00:05Z' },
+      { type: 'action', label: 'Send congratulations email', outcome: 'success', errorMessage: null, timestamp: '2026-01-20T16:00:10Z' },
+    ],
+  },
+  {
+    id: 'run-005',
+    userId: 'user-002',
+    userName: 'Marco Bianchi',
+    userEmail: 'marco.bianchi@example.com',
+    enrolledAt: '2026-01-25T08:00:00Z',
+    triggerEvent: 'Course completed',
+    reentryRule: 'Once per course',
+    status: 'failed',
+    steps: [
+      { type: 'trigger', label: 'Course completed', outcome: 'success', errorMessage: null, timestamp: '2026-01-25T08:00:00Z' },
+      { type: 'action', label: 'Award completion badge', outcome: 'success', errorMessage: null, timestamp: '2026-01-25T08:00:05Z' },
+      { type: 'action', label: 'Send congratulations email', outcome: 'failed', errorMessage: 'User email address is invalid or has been unsubscribed.', timestamp: '2026-01-25T08:00:10Z' },
+      { type: 'action', label: 'Add premium tag', outcome: 'failed', errorMessage: 'API rate limit exceeded. Please retry in 60 seconds.', timestamp: '2026-01-25T08:00:15Z' },
+    ],
+  },
+  {
+    id: 'run-006',
+    userId: 'user-003',
+    userName: 'Sofia Esposito',
+    userEmail: 'sofia.esposito@example.com',
+    enrolledAt: '2026-02-03T12:00:00Z',
+    triggerEvent: 'User inactive for 30 days',
+    reentryRule: 'Once every 30 days',
+    status: 'exited',
+    steps: [
+      { type: 'trigger', label: 'User inactive for 30 days', outcome: 'success', errorMessage: null, timestamp: '2026-02-03T12:00:00Z' },
+      { type: 'action', label: 'Send re-engagement email', outcome: 'success', errorMessage: null, timestamp: '2026-02-03T12:01:00Z' },
+    ],
+  },
+  {
+    id: 'run-007',
+    userId: 'user-001',
+    userName: 'Alice Rossi',
+    userEmail: 'alice.rossi@example.com',
+    enrolledAt: '2026-02-10T09:30:00Z',
+    triggerEvent: 'User finishes free course',
+    reentryRule: 'Once per user',
+    status: 'completed',
+    steps: [
+      { type: 'trigger', label: 'User finishes free course', outcome: 'success', errorMessage: null, timestamp: '2026-02-10T09:30:00Z' },
+      { type: 'action', label: 'Send upsell offer email', outcome: 'success', errorMessage: null, timestamp: '2026-02-10T09:30:05Z' },
+      { type: 'action', label: 'Add upsell-pending tag', outcome: 'success', errorMessage: null, timestamp: '2026-02-10T09:30:10Z' },
+      { type: 'branch', label: 'Branch', outcome: 'success', branchPath: 'yes', errorMessage: null, timestamp: '2026-02-10T09:30:12Z' },
+      { type: 'completion', label: 'Automation completed', outcome: 'success', errorMessage: null, timestamp: '2026-02-10T09:30:15Z' },
+    ],
+  },
+  {
+    id: 'run-008',
+    userId: 'user-002',
+    userName: 'Marco Bianchi',
+    userEmail: 'marco.bianchi@example.com',
+    enrolledAt: '2026-02-18T11:00:00Z',
+    triggerEvent: 'User finishes free course',
+    reentryRule: 'Once per user',
+    status: 'failed',
+    steps: [
+      { type: 'trigger', label: 'User finishes free course', outcome: 'success', errorMessage: null, timestamp: '2026-02-18T11:00:00Z' },
+      { type: 'action', label: 'Send upsell offer email', outcome: 'failed', errorMessage: 'Email template "upsell-v2" not found. Please check the template name.', timestamp: '2026-02-18T11:00:05Z' },
+      { type: 'action', label: 'Add upsell-pending tag', outcome: 'success', errorMessage: null, timestamp: '2026-02-18T11:00:10Z' },
+    ],
+  },
+  {
+    id: 'run-009',
+    userId: 'user-003',
+    userName: 'Sofia Esposito',
+    userEmail: 'sofia.esposito@example.com',
+    enrolledAt: '2026-02-25T15:00:00Z',
+    triggerEvent: 'User signs up',
+    reentryRule: 'Once per user',
+    status: 'in_progress',
+    steps: [
+      { type: 'trigger', label: 'User signs up', outcome: 'success', errorMessage: null, timestamp: '2026-02-25T15:00:00Z' },
+      { type: 'action', label: 'Send welcome email', outcome: 'success', errorMessage: null, timestamp: '2026-02-25T15:01:00Z' },
+    ],
+  },
+  {
+    id: 'run-010',
+    userId: 'user-001',
+    userName: 'Alice Rossi',
+    userEmail: 'alice.rossi@example.com',
+    enrolledAt: '2026-03-05T10:00:00Z',
+    triggerEvent: 'User inactive for 30 days',
+    reentryRule: 'Once every 30 days',
+    status: 'completed',
+    steps: [
+      { type: 'trigger', label: 'User inactive for 30 days', outcome: 'success', errorMessage: null, timestamp: '2026-03-05T10:00:00Z' },
+      { type: 'action', label: 'Send re-engagement email', outcome: 'success', errorMessage: null, timestamp: '2026-03-05T10:01:00Z' },
+      { type: 'action', label: 'Add re-engagement tag', outcome: 'success', errorMessage: null, timestamp: '2026-03-05T10:01:05Z' },
+      { type: 'branch', label: 'Branch', outcome: 'failed', branchPath: 'no', errorMessage: null, timestamp: '2026-03-05T10:01:08Z' },
+      { type: 'completion', label: 'Automation completed', outcome: 'success', errorMessage: null, timestamp: '2026-03-05T10:01:10Z' },
+    ],
+  },
+  {
+    id: 'run-011',
+    userId: 'user-002',
+    userName: 'Marco Bianchi',
+    userEmail: 'marco.bianchi@example.com',
+    enrolledAt: '2026-03-12T13:00:00Z',
+    triggerEvent: 'Course completed',
+    reentryRule: 'Once per course',
+    status: 'exited',
+    steps: [
+      { type: 'trigger', label: 'Course completed', outcome: 'success', errorMessage: null, timestamp: '2026-03-12T13:00:00Z' },
+      { type: 'action', label: 'Award completion badge', outcome: 'success', errorMessage: null, timestamp: '2026-03-12T13:00:05Z' },
+      { type: 'action', label: 'Send congratulations email', outcome: 'success', errorMessage: null, timestamp: '2026-03-12T13:00:10Z' },
+    ],
+  },
+]
