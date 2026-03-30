@@ -9,6 +9,7 @@ export interface Step {
 
 export interface Run {
   id: string
+  automationId: string
   userId: string
   userName: string
   userEmail: string
@@ -22,6 +23,7 @@ export interface Run {
 export const runs: Run[] = [
   {
     id: 'run-001',
+    automationId: 'auto-001',
     userId: 'user-001',
     userName: 'Alice Rossi',
     userEmail: 'alice.rossi@example.com',
@@ -39,6 +41,7 @@ export const runs: Run[] = [
   },
   {
     id: 'run-002',
+    automationId: 'auto-001',
     userId: 'user-002',
     userName: 'Marco Bianchi',
     userEmail: 'marco.bianchi@example.com',
@@ -54,6 +57,7 @@ export const runs: Run[] = [
   },
   {
     id: 'run-003',
+    automationId: 'auto-001',
     userId: 'user-003',
     userName: 'Sofia Esposito',
     userEmail: 'sofia.esposito@example.com',
@@ -66,12 +70,13 @@ export const runs: Run[] = [
       { type: 'action', label: 'Send welcome email', outcome: 'success', errorMessage: null, timestamp: '2026-01-12T10:31:00Z' },
       { type: 'action', label: 'Wait 3 days', outcome: 'success', errorMessage: null, timestamp: '2026-01-15T10:31:00Z' },
       { type: 'action', label: 'Add to newsletter tag', outcome: 'success', errorMessage: null, timestamp: '2026-01-15T10:31:05Z' },
-      { type: 'branch', label: 'Branch', outcome: 'failed', branchPath: 'no', errorMessage: null, timestamp: '2026-01-15T10:31:08Z' },
+      { type: 'branch', label: 'Branch', outcome: 'failed', branchPath: 'no', errorMessage: 'User followed the NO path of the branch and exited this branch early.', timestamp: '2026-01-15T10:31:08Z' },
       { type: 'completion', label: 'Automation completed', outcome: 'success', errorMessage: null, timestamp: '2026-01-15T10:31:10Z' },
     ],
   },
   {
     id: 'run-004',
+    automationId: 'auto-002',
     userId: 'user-001',
     userName: 'Alice Rossi',
     userEmail: 'alice.rossi@example.com',
@@ -87,6 +92,7 @@ export const runs: Run[] = [
   },
   {
     id: 'run-005',
+    automationId: 'auto-002',
     userId: 'user-002',
     userName: 'Marco Bianchi',
     userEmail: 'marco.bianchi@example.com',
@@ -103,6 +109,7 @@ export const runs: Run[] = [
   },
   {
     id: 'run-006',
+    automationId: 'auto-005',
     userId: 'user-003',
     userName: 'Sofia Esposito',
     userEmail: 'sofia.esposito@example.com',
@@ -117,6 +124,7 @@ export const runs: Run[] = [
   },
   {
     id: 'run-007',
+    automationId: 'auto-007',
     userId: 'user-001',
     userName: 'Alice Rossi',
     userEmail: 'alice.rossi@example.com',
@@ -134,6 +142,7 @@ export const runs: Run[] = [
   },
   {
     id: 'run-008',
+    automationId: 'auto-007',
     userId: 'user-002',
     userName: 'Marco Bianchi',
     userEmail: 'marco.bianchi@example.com',
@@ -149,6 +158,7 @@ export const runs: Run[] = [
   },
   {
     id: 'run-009',
+    automationId: 'auto-001',
     userId: 'user-003',
     userName: 'Sofia Esposito',
     userEmail: 'sofia.esposito@example.com',
@@ -163,6 +173,7 @@ export const runs: Run[] = [
   },
   {
     id: 'run-010',
+    automationId: 'auto-005',
     userId: 'user-001',
     userName: 'Alice Rossi',
     userEmail: 'alice.rossi@example.com',
@@ -180,6 +191,7 @@ export const runs: Run[] = [
   },
   {
     id: 'run-011',
+    automationId: 'auto-002',
     userId: 'user-002',
     userName: 'Marco Bianchi',
     userEmail: 'marco.bianchi@example.com',
@@ -191,6 +203,119 @@ export const runs: Run[] = [
       { type: 'trigger', label: 'Course completed', outcome: 'success', errorMessage: null, timestamp: '2026-03-12T13:00:00Z' },
       { type: 'action', label: 'Award completion badge', outcome: 'success', errorMessage: null, timestamp: '2026-03-12T13:00:05Z' },
       { type: 'action', label: 'Send congratulations email', outcome: 'success', errorMessage: null, timestamp: '2026-03-12T13:00:10Z' },
+    ],
+  },
+  {
+    id: 'run-012',
+    automationId: 'auto-001',
+    userId: 'user-004',
+    userName: 'Luca Ferrari',
+    userEmail: 'luca.ferrari@example.com',
+    enrolledAt: '2026-03-02T08:15:00Z',
+    triggerEvent: 'User signs up',
+    reentryRule: 'Once per user',
+    status: 'completed',
+    steps: [
+      { type: 'trigger', label: 'User signs up', outcome: 'success', errorMessage: null, timestamp: '2026-03-02T08:15:00Z' },
+      { type: 'action', label: 'Send welcome email', outcome: 'success', errorMessage: null, timestamp: '2026-03-02T08:16:00Z' },
+      { type: 'action', label: 'Add to newsletter tag', outcome: 'success', errorMessage: null, timestamp: '2026-03-02T08:16:05Z' },
+      { type: 'branch', label: 'Branch', outcome: 'success', branchPath: 'yes', errorMessage: null, timestamp: '2026-03-02T08:16:08Z' },
+      { type: 'completion', label: 'Automation completed', outcome: 'success', errorMessage: null, timestamp: '2026-03-02T08:16:10Z' },
+    ],
+  },
+  {
+    id: 'run-013',
+    automationId: 'auto-001',
+    userId: 'user-005',
+    userName: 'Giulia Romano',
+    userEmail: 'giulia.romano@example.com',
+    enrolledAt: '2026-03-08T11:30:00Z',
+    triggerEvent: 'User signs up',
+    reentryRule: 'Once per user',
+    status: 'failed',
+    steps: [
+      { type: 'trigger', label: 'User signs up', outcome: 'success', errorMessage: null, timestamp: '2026-03-08T11:30:00Z' },
+      { type: 'action', label: 'Send welcome email', outcome: 'failed', errorMessage: 'Recipient address rejected: User unknown in virtual mailbox table.', timestamp: '2026-03-08T11:31:00Z' },
+      { type: 'action', label: 'Add to newsletter tag', outcome: 'failed', errorMessage: 'Previous step failed; action skipped.', timestamp: '2026-03-08T11:31:05Z' },
+    ],
+  },
+  {
+    id: 'run-014',
+    automationId: 'auto-001',
+    userId: 'user-006',
+    userName: 'Andrea Colombo',
+    userEmail: 'andrea.colombo@example.com',
+    enrolledAt: '2026-03-14T09:45:00Z',
+    triggerEvent: 'User signs up',
+    reentryRule: 'Once per user',
+    status: 'completed',
+    steps: [
+      { type: 'trigger', label: 'User signs up', outcome: 'success', errorMessage: null, timestamp: '2026-03-14T09:45:00Z' },
+      { type: 'action', label: 'Send welcome email', outcome: 'success', errorMessage: null, timestamp: '2026-03-14T09:46:00Z' },
+      { type: 'action', label: 'Add to newsletter tag', outcome: 'success', errorMessage: null, timestamp: '2026-03-14T09:46:05Z' },
+      { type: 'branch', label: 'Branch', outcome: 'success', branchPath: 'yes', errorMessage: null, timestamp: '2026-03-14T09:46:08Z' },
+      { type: 'completion', label: 'Automation completed', outcome: 'success', errorMessage: null, timestamp: '2026-03-14T09:46:10Z' },
+    ],
+  },
+  {
+    id: 'run-015',
+    automationId: 'auto-001',
+    userId: 'user-007',
+    userName: 'Martina Ricci',
+    userEmail: 'martina.ricci@example.com',
+    enrolledAt: '2026-03-19T14:20:00Z',
+    triggerEvent: 'User signs up',
+    reentryRule: 'Once per user',
+    status: 'in_progress',
+    steps: [
+      { type: 'trigger', label: 'User signs up', outcome: 'success', errorMessage: null, timestamp: '2026-03-19T14:20:00Z' },
+      { type: 'action', label: 'Send welcome email', outcome: 'success', errorMessage: null, timestamp: '2026-03-19T14:21:00Z' },
+    ],
+  },
+  {
+    id: 'run-016',
+    automationId: 'auto-001',
+    userId: 'user-008',
+    userName: 'Paolo Conti',
+    userEmail: 'paolo.conti@example.com',
+    enrolledAt: '2026-03-24T10:00:00Z',
+    triggerEvent: 'User signs up',
+    reentryRule: 'Once per user',
+    status: 'completed',
+    steps: [
+      { type: 'trigger', label: 'User signs up', outcome: 'success', errorMessage: null, timestamp: '2026-03-24T10:00:00Z' },
+      { type: 'action', label: 'Send welcome email', outcome: 'success', errorMessage: null, timestamp: '2026-03-24T10:01:00Z' },
+      { type: 'action', label: 'Add to newsletter tag', outcome: 'success', errorMessage: null, timestamp: '2026-03-24T10:01:05Z' },
+      { type: 'branch', label: 'Branch', outcome: 'success', branchPath: 'yes', errorMessage: null, timestamp: '2026-03-24T10:01:08Z' },
+      { type: 'completion', label: 'Automation completed', outcome: 'success', errorMessage: null, timestamp: '2026-03-24T10:01:10Z' },
+    ],
+  },
+  {
+    id: 'run-017',
+    automationId: 'auto-001',
+    userId: 'user-009',
+    userName: 'Elena Galli',
+    userEmail: 'elena.galli@example.com',
+    enrolledAt: '2026-03-11T16:30:00Z',
+    triggerEvent: 'User signs up',
+    reentryRule: 'Once per user',
+    status: 'failed',
+    steps: [
+      { type: 'trigger', label: 'User signs up', outcome: 'failed', errorMessage: 'Trigger condition evaluation failed: contact list segment could not be resolved.', timestamp: '2026-03-11T16:30:00Z' },
+    ],
+  },
+  {
+    id: 'run-018',
+    automationId: 'auto-001',
+    userId: 'user-010',
+    userName: 'Roberto Mancini',
+    userEmail: 'roberto.mancini@example.com',
+    enrolledAt: '2026-03-21T09:10:00Z',
+    triggerEvent: 'User signs up',
+    reentryRule: 'Once per user',
+    status: 'failed',
+    steps: [
+      { type: 'trigger', label: 'User signs up', outcome: 'failed', errorMessage: 'Re-entry rule violation: contact already enrolled within the restricted window.', timestamp: '2026-03-21T09:10:00Z' },
     ],
   },
 ]

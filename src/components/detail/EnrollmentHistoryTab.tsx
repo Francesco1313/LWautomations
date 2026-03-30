@@ -10,17 +10,21 @@ function formatDateTime(iso: string) {
   })
 }
 
-const statusColors: Record<string, string> = {
-  completed: '#029c91',
-  in_progress: '#3949AB',
-  failed: '#ec0e0e',
-  exited: '#f59e0b',
-}
-const statusLabels: Record<string, string> = {
-  completed: 'Completed',
-  in_progress: 'In progress',
-  failed: 'Failed',
-  exited: 'Exited',
+type DateRange = '7d' | '30d' | '90d' | 'all'
+
+const DATE_RANGE_OPTIONS: { value: DateRange; label: string }[] = [
+  { value: '7d',  label: 'Last 7 days' },
+  { value: '30d', label: 'Last 30 days' },
+  { value: '90d', label: 'Last 90 days' },
+  { value: 'all', label: 'All time' },
+]
+
+function cutoffDate(range: DateRange): Date | null {
+  if (range === 'all') return null
+  const days = range === '7d' ? 7 : range === '30d' ? 30 : 90
+  const d = new Date()
+  d.setDate(d.getDate() - days)
+  return d
 }
 
 interface Props { runs: Run[] }
@@ -28,6 +32,7 @@ interface Props { runs: Run[] }
 export default function EnrollmentHistoryTab({ runs }: Props) {
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
+  const [dateRange, setDateRange] = useState<DateRange>('30d')
   const [panelRun, setPanelRun] = useState<Run | null>(null)
 
   const sorted = useMemo(() =>
@@ -35,50 +40,82 @@ export default function EnrollmentHistoryTab({ runs }: Props) {
     [runs]
   )
 
-  const filtered = useMemo(() =>
-    sorted.filter(r =>
-      r.userName.toLowerCase().includes(search.toLowerCase()) ||
-      r.userEmail.toLowerCase().includes(search.toLowerCase())
-    ),
-    [sorted, search]
-  )
+  const filtered = useMemo(() => {
+    const cutoff = cutoffDate(dateRange)
+    return sorted.filter(r => {
+      if (cutoff && new Date(r.enrolledAt) < cutoff) return false
+      if (search) {
+        const q = search.toLowerCase()
+        return r.userName.toLowerCase().includes(q) || r.userEmail.toLowerCase().includes(q)
+      }
+      return true
+    })
+  }, [sorted, search, dateRange])
 
   return (
     <>
       {/* Filter bar */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+      {/* DEV: use <SearchInput>, <DateRangePicker>, <Button variant="secondary"> */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
         <input
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Search by name or email..."
           style={{
             height: 34, padding: '0 12px', width: 260,
-            background: '#fff', border: '1px solid #e0e0e0',
-            borderRadius: 4, fontSize: 13, color: '#333', outline: 'none',
+            background: 'white', border: '1px solid var(--grey5)',
+            borderRadius: 4, fontSize: 13, outline: 'none',
           }}
         />
-        <span style={{ fontSize: 12, color: '#828282', marginLeft: 'auto' }}>
+        {/* DEV: use <DateRangePicker> */}
+        <select
+          value={dateRange}
+          onChange={e => setDateRange(e.target.value as DateRange)}
+          style={{
+            height: 34, padding: '0 12px',
+            border: '1px solid var(--grey5)', borderRadius: 4,
+            fontSize: 13, color: 'var(--grey2)', background: 'white', cursor: 'pointer',
+          }}
+        >
+          {DATE_RANGE_OPTIONS.map(o => (
+            <option key={o.value} value={o.value}>{o.label}</option>
+          ))}
+        </select>
+        <span style={{ fontSize: 12, color: 'var(--grey3)', marginLeft: 'auto' }}>
           Showing {filtered.length} of {runs.length} enrollments
         </span>
-        <button style={{
-          height: 34, padding: '0 14px',
-          border: '1px solid #e0e0e0', borderRadius: 4,
-          fontSize: 13, color: '#4f4f4f', background: '#fff', cursor: 'pointer',
-        }}>Export CSV</button>
+        {/* DEV: use <Button variant="secondary"> */}
+        <button
+          type="button"
+          onClick={() => {}}
+          style={{
+            height: 34, padding: '0 14px',
+            border: '1px solid var(--grey5)', borderRadius: 4,
+            fontSize: 13, color: 'var(--grey2)', background: 'white', cursor: 'pointer',
+          }}
+        >
+          Export CSV
+        </button>
       </div>
 
       {/* Table */}
+      {/* DEV: use <DataTable> */}
       <div style={{
-        background: '#fff', border: '1px solid #e0e0e0', borderRadius: 6,
+        background: 'white', border: '1px solid var(--grey5)', borderRadius: 6,
         overflow: 'hidden',
       }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+          <colgroup>
+            <col style={{ width: 260 }} />
+            <col />
+            <col style={{ width: 170 }} />
+          </colgroup>
           <thead>
-            <tr style={{ background: '#f9f9f9', borderBottom: '1px solid #f2f2f2' }}>
-              {['Contact', 'Diagnose', 'Trigger', 'Enrolled at', 'Status'].map(col => (
+            <tr style={{ background: 'var(--cool-grey)', borderBottom: '1px solid var(--grey5)' }}>
+              {['Contact', 'Trigger', 'Enrolled at'].map(col => (
                 <th key={col} style={{
                   padding: '10px 16px', textAlign: 'left',
-                  fontSize: 11, fontWeight: 600, color: '#828282',
+                  fontSize: 11, fontWeight: 600, color: 'var(--grey3)',
                   textTransform: 'uppercase', letterSpacing: '0.05em',
                   whiteSpace: 'nowrap',
                 }}>{col}</th>
@@ -88,73 +125,86 @@ export default function EnrollmentHistoryTab({ runs }: Props) {
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={5} style={{ padding: 48, textAlign: 'center', color: '#828282', fontSize: 13 }}>
-                  No enrollments in this period
+                <td colSpan={3} style={{ padding: 48, textAlign: 'center', color: 'var(--grey3)', fontSize: 13 }}>
+                  No enrollments match your filters
                 </td>
               </tr>
             ) : (
-              filtered.map(run => (
-                <tr key={run.id}
-                  style={{ borderBottom: '1px solid #f2f2f2' }}
-                  onMouseEnter={e => (e.currentTarget.style.background = '#f9f9f9')}
+              filtered.map(run => {
+                const triggerStep = run.steps.find(s => s.type === 'trigger')
+                const triggerOutcome = triggerStep?.outcome ?? 'success'
+                const outcomeColor = triggerOutcome === 'success' ? 'var(--teal)' : 'var(--red)'
+                const outcomeLabel = triggerOutcome === 'success' ? 'Success' : 'Failed'
+                const borderLeft = triggerOutcome === 'failed' ? '4px solid var(--red)' : '4px solid var(--grey2)'
+                return (
+                <tr
+                  key={run.id}
+                  style={{ borderBottom: '1px solid var(--grey6)', borderLeft }}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--grey7)')}
                   onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                 >
                   {/* Contact */}
-                  <td style={{ padding: '12px 16px' }}>
+                  <td style={{ padding: '10px 16px', verticalAlign: 'middle' }}>
+                    {/*
+                      OPEN QUESTION: This link currently navigates to /user/:id (UserProfile page).
+                      With the dedicated Automations tab removed from v1 scope, the final destination
+                      on the user profile is undefined — likely the Activity tab once automation events
+                      are integrated there. Update once OQ-07 is resolved.
+                    */}
+                    {/* DEV: use <TextButton> */}
                     <button
                       onClick={() => navigate(`/user/${run.userId}`)}
-                      style={{ fontSize: 13, color: '#029c91', fontWeight: 500, display: 'block', cursor: 'pointer' }}
-                    >{run.userName} ↗</button>
-                    <div style={{ fontSize: 12, color: '#828282' }}>{run.userEmail}</div>
-                  </td>
-                  {/* Diagnose */}
-                  <td style={{ padding: '12px 16px' }}>
-                    <button
-                      onClick={() => setPanelRun(run)}
                       style={{
-                        height: 30, padding: '0 12px',
-                        background: '#333', color: '#fff',
-                        fontSize: 12, fontWeight: 500, borderRadius: 4,
-                        cursor: 'pointer', whiteSpace: 'nowrap',
+                        fontSize: 13, color: 'var(--teal)', fontWeight: 500,
+                        cursor: 'pointer', display: 'block',
+                        background: 'transparent', border: 'none', padding: 0,
+                        textAlign: 'left',
                       }}
-                      onMouseEnter={e => (e.currentTarget.style.background = '#4f4f4f')}
-                      onMouseLeave={e => (e.currentTarget.style.background = '#333')}
-                    >Why did this enroll?</button>
+                    >
+                      {run.userName}
+                    </button>
+                    <div style={{ fontSize: 12, color: 'var(--grey3)' }}>{run.userEmail}</div>
                   </td>
-                  {/* Trigger */}
-                  <td style={{ padding: '12px 16px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ color: '#029c91', fontSize: 12 }}>●</span>
-                      <span style={{ fontSize: 13, color: '#4f4f4f' }}>
-                        Triggered from: {run.triggerEvent}
-                      </span>
-                    </div>
+
+                  {/* Trigger — matches Action Logs trigger row pattern */}
+                  <td style={{ padding: '10px 16px', verticalAlign: 'middle' }}>
+                        <div style={{ fontSize: 13, color: 'var(--grey1)' }}>
+                          {run.triggerEvent}
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
+                          <span style={{ fontSize: 8, color: outcomeColor }}>●</span>
+                          <span style={{ fontSize: 12, color: outcomeColor, fontWeight: 500 }}>{outcomeLabel}</span>
+                          <span style={{ color: 'var(--grey4)' }}>·</span>
+                          {/* DEV: use <TextButton> */}
+                          <button
+                            onClick={() => setPanelRun(run)}
+                            style={{
+                              fontSize: 12,
+                              color: 'var(--grey2)',
+                              cursor: 'pointer',
+                              textDecoration: 'underline',
+                              background: 'transparent',
+                              border: 'none',
+                              padding: 0,
+                            }}
+                          >
+                            Why did this enroll?
+                          </button>
+                        </div>
                   </td>
+
                   {/* Enrolled at */}
-                  <td style={{ padding: '12px 16px', fontSize: 13, color: '#828282', whiteSpace: 'nowrap' }}>
+                  <td style={{ padding: '10px 16px', fontSize: 12, color: 'var(--grey3)', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
                     {formatDateTime(run.enrolledAt)}
                   </td>
-                  {/* Status */}
-                  <td style={{ padding: '12px 16px' }}>
-                    <span style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 5,
-                      padding: '3px 10px', borderRadius: 100,
-                      fontSize: 12, fontWeight: 500,
-                      background: statusColors[run.status] + '18',
-                      color: statusColors[run.status],
-                    }}>
-                      <span style={{ fontSize: 8 }}>●</span>
-                      {statusLabels[run.status]}
-                    </span>
-                  </td>
                 </tr>
-              ))
+                )
+              })
             )}
           </tbody>
         </table>
       </div>
 
-      {/* Why did this enroll panel */}
       {panelRun && (
         <WhyDidEnrollPanel run={panelRun} onClose={() => setPanelRun(null)} />
       )}

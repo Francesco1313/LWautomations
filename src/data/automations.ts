@@ -5,9 +5,13 @@ export interface Automation {
   trigger: string
   timesExecuted: number
   editedOn: string
-  status: 'published' | 'unpublished'
+  editedBy: string
+  createdOn: string
+  createdBy: string
+  status: 'active' | 'inactive'
   hasErrors: boolean
-  errorCount: number
+  enrolledTotal: number
+  enrolledLast7Days: number | null
 }
 
 export const automations: Automation[] = [
@@ -18,9 +22,13 @@ export const automations: Automation[] = [
     trigger: 'User signs up',
     timesExecuted: 1240,
     editedOn: '2025-11-14T10:30:00Z',
-    status: 'published',
+    editedBy: 'Maria Rossi',
+    createdOn: '2025-03-10T09:00:00Z',
+    createdBy: 'Admin',
+    status: 'active',
     hasErrors: false,
-    errorCount: 0,
+    enrolledTotal: 1240,
+    enrolledLast7Days: 42,
   },
   {
     id: 'auto-002',
@@ -29,9 +37,13 @@ export const automations: Automation[] = [
     trigger: 'Course completed',
     timesExecuted: 845,
     editedOn: '2025-12-02T14:15:00Z',
-    status: 'published',
+    editedBy: 'Luca Bianchi',
+    createdOn: '2025-04-22T11:00:00Z',
+    createdBy: 'Admin',
+    status: 'active',
     hasErrors: true,
-    errorCount: 3,
+    enrolledTotal: 845,
+    enrolledLast7Days: 18,
   },
   {
     id: 'auto-003',
@@ -40,9 +52,13 @@ export const automations: Automation[] = [
     trigger: 'User abandons cart',
     timesExecuted: 312,
     editedOn: '2025-10-28T09:00:00Z',
-    status: 'unpublished',
+    editedBy: 'Admin',
+    createdOn: '2025-05-15T08:00:00Z',
+    createdBy: 'Admin',
+    status: 'inactive',
     hasErrors: false,
-    errorCount: 0,
+    enrolledTotal: 312,
+    enrolledLast7Days: null,
   },
   {
     id: 'auto-004',
@@ -51,9 +67,13 @@ export const automations: Automation[] = [
     trigger: 'Scheduled monthly',
     timesExecuted: 24,
     editedOn: '2025-12-15T16:45:00Z',
-    status: 'published',
+    editedBy: 'Maria Rossi',
+    createdOn: '2025-01-01T00:00:00Z',
+    createdBy: 'Admin',
+    status: 'active',
     hasErrors: false,
-    errorCount: 0,
+    enrolledTotal: 24,
+    enrolledLast7Days: 2,
   },
   {
     id: 'auto-005',
@@ -62,9 +82,13 @@ export const automations: Automation[] = [
     trigger: 'User inactive for 30 days',
     timesExecuted: 560,
     editedOn: '2025-11-20T11:00:00Z',
-    status: 'published',
+    editedBy: 'Luca Bianchi',
+    createdOn: '2025-06-01T10:00:00Z',
+    createdBy: 'Admin',
+    status: 'active',
     hasErrors: true,
-    errorCount: 7,
+    enrolledTotal: 560,
+    enrolledLast7Days: 31,
   },
   {
     id: 'auto-006',
@@ -73,9 +97,13 @@ export const automations: Automation[] = [
     trigger: 'Instructor account created',
     timesExecuted: 78,
     editedOn: '2025-09-05T13:30:00Z',
-    status: 'unpublished',
+    editedBy: 'Admin',
+    createdOn: '2025-02-14T12:00:00Z',
+    createdBy: 'Admin',
+    status: 'inactive',
     hasErrors: false,
-    errorCount: 0,
+    enrolledTotal: 78,
+    enrolledLast7Days: null,
   },
   {
     id: 'auto-007',
@@ -84,9 +112,13 @@ export const automations: Automation[] = [
     trigger: 'User finishes free course',
     timesExecuted: 430,
     editedOn: '2025-12-18T08:20:00Z',
-    status: 'published',
+    editedBy: 'Maria Rossi',
+    createdOn: '2025-07-10T09:30:00Z',
+    createdBy: 'Admin',
+    status: 'active',
     hasErrors: false,
-    errorCount: 0,
+    enrolledTotal: 430,
+    enrolledLast7Days: 22,
   },
   {
     id: 'auto-008',
@@ -95,8 +127,12 @@ export const automations: Automation[] = [
     trigger: 'User birthday',
     timesExecuted: 192,
     editedOn: '2025-07-30T17:10:00Z',
-    status: 'unpublished',
+    editedBy: 'Admin',
+    createdOn: '2025-01-20T14:00:00Z',
+    createdBy: 'Admin',
+    status: 'inactive',
     hasErrors: false,
-    errorCount: 0,
+    enrolledTotal: 192,
+    enrolledLast7Days: null,
   },
 ]

@@ -1,161 +1,217 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import Sidebar from '../components/layout/Sidebar'
-import PerformanceTab from '../components/detail/PerformanceTab'
-import EnrollmentHistoryTab from '../components/detail/EnrollmentHistoryTab'
-import ActionLogsTab from '../components/detail/ActionLogsTab'
 import { automations } from '../data/automations'
 import { runs } from '../data/runs'
-
-type Tab = 'performance' | 'action-logs' | 'enrollment-history'
+import ActionLogsTab from '../components/detail/ActionLogsTab'
+import EnrollmentHistoryTab from '../components/detail/EnrollmentHistoryTab'
+import PerformanceTab from '../components/detail/PerformanceTab'
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+  return new Date(iso).toLocaleDateString('en-GB', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
+  })
 }
+
+const TABS = [
+  { key: 'performance',  label: 'Performance' },
+  { key: 'action-logs',  label: 'Action logs' },
+  { key: 'enrollment',   label: 'Enrollment history' },
+] as const
+
+type TabKey = typeof TABS[number]['key']
 
 export default function DetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const automation = automations.find(a => a.id === id)
-  const [activeTab, setActiveTab] = useState<Tab>('performance')
+  const [activeTab, setActiveTab] = useState<TabKey>('action-logs')
+  const automationRuns = runs.filter(r => r.automationId === id)
 
   if (!automation) {
     return (
-      <div style={{ display: 'flex', height: '100vh', fontFamily: "'Helvetica Neue', sans-serif" }}>
+      <div style={{ display: 'flex', height: '100vh', fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
         <Sidebar />
-        <main style={{ flex: 1, padding: 32, background: '#f9f9f9' }}>
-          <p style={{ color: '#828282' }}>Automation not found.</p>
+        <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <p style={{ color: 'var(--grey3)', fontSize: 15 }}>Automation not found.</p>
         </main>
       </div>
     )
   }
 
-  const totalEnrolled = runs.length
-
-  const tabs: { key: Tab; label: string }[] = [
-    { key: 'performance', label: 'Performance' },
-    { key: 'action-logs', label: 'Action logs' },
-    { key: 'enrollment-history', label: 'Enrollment history' },
-  ]
-
   return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', fontFamily: "'Helvetica Neue', sans-serif" }}>
+    <div style={{
+      display: 'flex', height: '100vh', overflow: 'hidden',
+      fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+    }}>
       <Sidebar />
 
-      <main style={{ flex: 1, overflowY: 'auto', background: '#f9f9f9', display: 'flex', flexDirection: 'column' }}>
+      <main style={{
+        flex: 1, overflowY: 'auto',
+        background: '#fff',
+        display: 'flex', flexDirection: 'column',
+      }}>
 
-        {/* ── Page header ── */}
-        <div style={{ background: '#fff', borderBottom: '1px solid #e0e0e0', padding: '20px 32px 0', flexShrink: 0 }}>
-
+        {/* ── Page header ─────────────────────────────────────────────────────── */}
+        {/* DEV: use <PageTopHeader> component */}
+        <div style={{
+          background: '#fff',
+          borderBottom: '1px solid var(--grey5)',
+          padding: '18px 32px 0',
+          flexShrink: 0,
+        }}>
           {/* Breadcrumb */}
-          <div style={{ fontSize: 13, color: '#828282', marginBottom: 10 }}>
+          <div style={{ fontSize: 13, color: 'var(--grey3)', marginBottom: 12 }}>
             <button
               onClick={() => navigate('/')}
-              style={{ color: '#029c91', fontSize: 13, cursor: 'pointer', fontWeight: 500 }}
-            >Automations</button>
-            <span style={{ margin: '0 6px' }}>›</span>
+              style={{
+                color: 'var(--teal)', fontSize: 13, cursor: 'pointer',
+                fontWeight: 500, background: 'none', border: 'none', padding: 0,
+              }}
+            >
+              Automations
+            </button>
+            <span style={{ margin: '0 6px', color: 'var(--grey4)' }}>›</span>
             <span>{automation.name}</span>
           </div>
 
-          {/* Title row */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 }}>
+          {/* Title row + Edit button */}
+          <div style={{
+            display: 'flex', alignItems: 'flex-start',
+            justifyContent: 'space-between', gap: 16, marginBottom: 12,
+          }}>
             <div>
-              <h1 style={{ fontSize: 22, fontWeight: 700, color: '#333', margin: 0 }}>
+              {/* DEV: use <PageTitle> */}
+              <h1 style={{ fontSize: 22, fontWeight: 500, color: 'var(--grey1)', margin: '0 0 10px', lineHeight: 1.2 }}>
                 {automation.name}
               </h1>
-              {/* Status indicators */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginTop: 8 }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, color: automation.status === 'published' ? '#029c91' : '#828282' }}>
-                  <span style={{ fontSize: 9 }}>●</span>
-                  Workflow is {automation.status === 'published' ? 'ON' : 'OFF'}
+
+              {/* Status pills */}
+              {/* DEV: use <StatusPill> for each pill */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+
+                {/* Workflow ON/OFF pill */}
+                <span style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  fontSize: 13, color: automation.status === 'active' ? 'var(--teal)' : 'var(--grey3)',
+                }}>
+                  <span style={{
+                    width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
+                    background: automation.status === 'active' ? 'var(--teal)' : 'var(--grey4)',
+                    boxShadow: automation.status === 'active' ? '0 0 0 2px var(--light-teal)' : 'none',
+                  }} />
+                  {automation.status === 'active' ? 'Workflow is ON' : 'Workflow is OFF'}
                 </span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, color: automation.hasErrors ? '#ec0e0e' : '#029c91' }}>
-                  <span style={{ fontSize: 9 }}>●</span>
-                  {automation.hasErrors ? `${automation.errorCount} issues found` : 'Workflow without issues'}
+
+                {/* Error pill */}
+                <span style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  fontSize: 13, color: automation.hasErrors ? 'var(--red)' : 'var(--teal)',
+                }}>
+                  <span style={{
+                    width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
+                    background: automation.hasErrors ? 'var(--red)' : 'var(--teal)',
+                    boxShadow: automation.hasErrors ? 'none' : '0 0 0 2px var(--light-teal)',
+                  }} />
+                  {automation.hasErrors ? 'Workflow has errors' : 'Workflow without issues'}
                 </span>
+
               </div>
             </div>
 
-            {/* Action buttons */}
-            <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-              <button
-                onClick={() => navigate(`/canvas/${id}`)}
-                style={{
-                  height: 36, padding: '0 16px',
-                  background: '#029c91', color: '#fff',
-                  fontSize: 13, fontWeight: 500, borderRadius: 4, cursor: 'pointer',
-                }}
-                onMouseEnter={e => (e.currentTarget.style.background = '#027d74')}
-                onMouseLeave={e => (e.currentTarget.style.background = '#029c91')}
-              >Edit automation</button>
-              <button style={{
-                height: 36, padding: '0 16px',
-                border: '1px solid #e0e0e0', borderRadius: 4,
-                fontSize: 13, color: '#333', background: '#fff', cursor: 'pointer',
+            {/* DEV: use <Button variant="primary"> */}
+            <button
+              onClick={() => navigate(`/canvas/${automation.id}`)}
+              style={{
+                height: 32, padding: '0 14px', flexShrink: 0,
+                background: 'var(--teal)', color: '#fff',
+                border: 'none', borderRadius: 4,
+                fontSize: 14, fontWeight: 500, cursor: 'pointer',
               }}
-                onMouseEnter={e => (e.currentTarget.style.background = '#f9f9f9')}
-                onMouseLeave={e => (e.currentTarget.style.background = '#fff')}
-              >Review workflow issues</button>
-            </div>
+              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--teal-80)')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--teal)')}
+            >
+              Edit automation
+            </button>
           </div>
 
-          {/* Metadata table */}
+          {/* Tab navigation */}
+          {/* DEV: use <TabNav> from admin UI library */}
           <div style={{
-            border: '1px solid #e0e0e0', borderRadius: 4,
-            overflow: 'hidden', marginBottom: 16,
+            display: 'flex', borderTop: '1px solid var(--grey5)', marginTop: 4,
           }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ background: '#f9f9f9', borderBottom: '1px solid #f2f2f2' }}>
-                  {['Trigger', 'Enrolled total', 'Enrolled last 7 days', 'Updated on', 'Updated by', 'Created on', 'Created by'].map(col => (
-                    <th key={col} style={{
-                      padding: '8px 14px', textAlign: 'left',
-                      fontSize: 11, fontWeight: 600, color: '#828282',
-                      textTransform: 'uppercase', letterSpacing: '0.05em',
-                      whiteSpace: 'nowrap',
-                    }}>{col}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style={{ padding: '10px 14px', fontSize: 13, color: '#333' }}>{automation.trigger}</td>
-                  <td style={{ padding: '10px 14px', fontSize: 13, color: '#333' }}>{totalEnrolled}</td>
-                  <td style={{ padding: '10px 14px', fontSize: 13, color: '#828282' }}>—</td>
-                  <td style={{ padding: '10px 14px', fontSize: 13, color: '#333', whiteSpace: 'nowrap' }}>{formatDate(automation.editedOn)}</td>
-                  <td style={{ padding: '10px 14px', fontSize: 13, color: '#333' }}>Francesco Papetti</td>
-                  <td style={{ padding: '10px 14px', fontSize: 13, color: '#333', whiteSpace: 'nowrap' }}>Jan 15, 2025</td>
-                  <td style={{ padding: '10px 14px', fontSize: 13, color: '#333' }}>Dimitris Tzortzis</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          {/* Tab bar */}
-          <div style={{ display: 'flex', gap: 0, marginBottom: -1 }}>
-            {tabs.map(tab => (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                style={{
-                  height: 40, padding: '0 20px',
-                  fontSize: 14,
-                  fontWeight: activeTab === tab.key ? 600 : 400,
-                  color: activeTab === tab.key ? '#333' : '#828282',
-                  borderBottom: activeTab === tab.key ? '2px solid #333' : '2px solid transparent',
-                  background: 'transparent', cursor: 'pointer',
-                }}
-              >{tab.label}</button>
-            ))}
+            {TABS.map(tab => {
+              const active = activeTab === tab.key
+              return (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  style={{
+                    height: 40, padding: '0 18px',
+                    background: 'transparent', border: 'none',
+                    borderBottom: active ? '2px solid var(--teal)' : '2px solid transparent',
+                    marginBottom: -1,
+                    fontSize: 14, fontWeight: active ? 700 : 400,
+                    color: active ? 'var(--teal)' : 'var(--grey3)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {tab.label}
+                </button>
+              )
+            })}
           </div>
         </div>
 
-        {/* ── Tab content ── */}
-        <div style={{ padding: '28px 32px', flex: 1 }}>
-          {activeTab === 'performance' && <PerformanceTab runs={runs} />}
-          {activeTab === 'enrollment-history' && <EnrollmentHistoryTab runs={runs} />}
-          {activeTab === 'action-logs' && <ActionLogsTab runs={runs} />}
+        {/* ── Metadata bar ─────────────────────────────────────────────────────── */}
+        {/* DEV: use <MetadataBar> or equivalent admin UI component */}
+        <div style={{
+          background: 'var(--grey7)',
+          borderBottom: '1px solid var(--grey5)',
+          padding: '14px 32px',
+          display: 'flex', flexWrap: 'wrap', gap: '12px 40px',
+          flexShrink: 0,
+        }}>
+          {[
+            { label: 'Enrolled total',       value: automation.enrolledTotal.toLocaleString() },
+            { label: 'Enrolled last 7 days', value: automation.enrolledLast7Days !== null ? automation.enrolledLast7Days.toLocaleString() : '—' },
+            { label: 'Updated on',           value: formatDate(automation.editedOn) },
+            { label: 'Updated by',           value: automation.editedBy },
+            { label: 'Created on',           value: formatDate(automation.createdOn) },
+            { label: 'Created by',           value: 'Francesco Papetti' },
+          ].map(({ label, value }) => (
+            <div key={label} style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
+              <span style={{
+                fontSize: 11, color: 'var(--grey3)',
+                textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 500,
+                whiteSpace: 'nowrap',
+              }}>
+                {label}
+              </span>
+              <span style={{ fontSize: 13, color: 'var(--grey1)', fontWeight: 500, whiteSpace: 'nowrap' }}>
+                {value}
+              </span>
+            </div>
+          ))}
         </div>
+
+        {/* ── Tab content ──────────────────────────────────────────────────────── */}
+        <div style={{ flex: 1, padding: '24px 32px' }}>
+
+          {activeTab === 'performance' && (
+            <PerformanceTab runs={automationRuns} />
+          )}
+
+          {activeTab === 'action-logs' && (
+            <ActionLogsTab runs={automationRuns} />
+          )}
+
+          {activeTab === 'enrollment' && (
+            <EnrollmentHistoryTab runs={automationRuns} />
+          )}
+
+        </div>
+
       </main>
     </div>
   )

@@ -6,6 +6,10 @@ export interface CanvasNodeData {
   title: string
   subtitle?: string
   chips?: string[]
+  /** Maps canvas node title to the step label used in run data */
+  stepLabel?: string
+  /** Mock count of users currently waiting at this node (delay nodes only) */
+  waitingCount?: number
 }
 
 interface NodeSideformProps {

@@ -1,3 +1,51 @@
+/* LearnWorlds design system tokens — from STYLE.md */
+:root {
+  /* Brand */
+  --teal: #029C91;
+  --teal-80: #01837A;
+  --teal-60-light1: #00aeab;
+  --teal-60-light2: #D6EAEA;
+  --teal-60-light3: #F2FAF9;
+  --teal-90: #022B30;
+  --light-teal: #E1F7F5;
+
+  /* Greys */
+  --grey1: #333333;
+  --grey2: #4F4F4F;
+  --grey3: #828282;
+  --grey4: #BDBDBD;
+  --grey5: #E0E0E0;
+  --grey6: #F2F2F2;
+  --grey7: #F9F9F9;
+  --cool-grey: #F2F4F8;
+
+  /* Semantic */
+  --red: #F04438;
+  --dark-red: #B42318;
+  --light-red: #FEF3F2;
+  --green: #235826;
+  --light-green: #ECFDF3;
+  --dark-green: #6fcf97;
+  --orange: #B54708;
+  --light-orange: #FFFAEB;
+  --blue: #283593;
+  --light-blue: #F0F9FF;
+
+  /* Status */
+  --not-started: #C0C5DF;
+  --in-progress: #FB8C00;
+  --completed: #52A62B;
+
+  /* Notification backgrounds */
+  --notification-bg: color-mix(in srgb, white 93%, var(--red));
+  --notification-border: color-mix(in srgb, white 70%, var(--red));
+  --tip-bg: color-mix(in srgb, white 93%, #FFC240);
+  --tip-border: color-mix(in srgb, white 70%, #FFC240);
+  --info-bg: white;
+  --info-border: var(--grey5);
+  --info-bg-dark: var(--grey7);
+}
+
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;

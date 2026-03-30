@@ -12,8 +12,8 @@ export default function TopBar({ automationName }: TopBarProps) {
   return (
     <div style={{
       height: 44,
-      background: '#ffffff',
-      borderBottom: '1px solid #e0e0e0',
+      background: 'white',
+      borderBottom: '1px solid var(--grey5)',
       display: 'flex',
       alignItems: 'center',
       padding: '0 16px',
@@ -28,27 +28,35 @@ export default function TopBar({ automationName }: TopBarProps) {
             display: 'flex',
             alignItems: 'center',
             gap: 6,
-            color: '#4f4f4f',
+            color: 'var(--grey2)',
             fontSize: 14,
             padding: '4px 6px',
             borderRadius: 4,
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.background = '#f2f2f2')}
+          onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--grey6)')}
           onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
         >
           <span style={{ fontSize: 16 }}>←</span>
         </button>
-        <span style={{ fontSize: 14, color: '#333', fontWeight: 500 }}>Automation</span>
-        <span style={{ color: '#bdbdbd', fontSize: 14 }}>|</span>
-        <span style={{ fontSize: 14, color: '#4f4f4f', cursor: 'pointer' }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = '#029c91')}
-          onMouseLeave={(e) => (e.currentTarget.style.color = '#4f4f4f')}>Edit</span>
-        <span style={{ color: '#bdbdbd', fontSize: 14 }}>|</span>
-        <span style={{ fontSize: 14, color: '#4f4f4f', cursor: 'pointer' }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = '#029c91')}
-          onMouseLeave={(e) => (e.currentTarget.style.color = '#4f4f4f')}>Help</span>
-        <span style={{ color: '#bdbdbd', fontSize: 14 }}>|</span>
-        <span style={{ fontSize: 14, color: '#d9006f', cursor: 'pointer', fontWeight: 500 }}>Upgrade</span>
+        <span style={{ fontSize: 14, color: 'var(--grey1)', fontWeight: 500 }}>
+          {automationName}
+        </span>
+        <span style={{ color: 'var(--grey4)', fontSize: 14 }}>|</span>
+        <span
+          style={{ fontSize: 14, color: 'var(--grey2)', cursor: 'pointer' }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--teal)')}
+          onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--grey2)')}
+        >
+          Edit
+        </span>
+        <span style={{ color: 'var(--grey4)', fontSize: 14 }}>|</span>
+        <span
+          style={{ fontSize: 14, color: 'var(--grey2)', cursor: 'pointer' }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--teal)')}
+          onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--grey2)')}
+        >
+          Help
+        </span>
       </div>
 
       {/* Center: Undo / Redo */}
@@ -62,18 +70,18 @@ export default function TopBar({ automationName }: TopBarProps) {
       }}>
         <button style={{
           display: 'flex', alignItems: 'center', gap: 4,
-          color: '#828282', fontSize: 13, padding: '4px 8px', borderRadius: 4,
+          color: 'var(--grey3)', fontSize: 13, padding: '4px 8px', borderRadius: 4,
         }}
-          onMouseEnter={(e) => (e.currentTarget.style.background = '#f2f2f2')}
+          onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--grey6)')}
           onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}>
           <span style={{ fontSize: 14 }}>↩</span>
           <span>Undo</span>
         </button>
         <button style={{
           display: 'flex', alignItems: 'center', gap: 4,
-          color: '#828282', fontSize: 13, padding: '4px 8px', borderRadius: 4,
+          color: 'var(--grey3)', fontSize: 13, padding: '4px 8px', borderRadius: 4,
         }}
-          onMouseEnter={(e) => (e.currentTarget.style.background = '#f2f2f2')}
+          onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--grey6)')}
           onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}>
           <span style={{ fontSize: 14 }}>↪</span>
           <span>Redo</span>
@@ -90,7 +98,7 @@ export default function TopBar({ automationName }: TopBarProps) {
               width: 36,
               height: 20,
               borderRadius: 10,
-              background: isPublished ? '#029c91' : '#bdbdbd',
+              background: isPublished ? 'var(--teal)' : 'var(--grey4)',
               position: 'relative',
               transition: 'background 0.2s',
               flexShrink: 0,
@@ -103,26 +111,26 @@ export default function TopBar({ automationName }: TopBarProps) {
               width: 16,
               height: 16,
               borderRadius: '50%',
-              background: '#fff',
+              background: 'white',
               transition: 'left 0.2s',
               boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
             }} />
           </button>
-          <span style={{ fontSize: 13, color: '#4f4f4f' }}>Publish the automation</span>
+          <span style={{ fontSize: 13, color: 'var(--grey2)' }}>Publish the automation</span>
         </div>
         <button style={{
           height: 32,
           padding: '0 16px',
-          background: '#029c91',
-          color: '#fff',
+          background: 'var(--teal)',
+          color: 'white',
           fontSize: 13,
           fontWeight: 500,
           borderRadius: 4,
           border: 'none',
           cursor: 'pointer',
         }}
-          onMouseEnter={(e) => (e.currentTarget.style.background = '#027d74')}
-          onMouseLeave={(e) => (e.currentTarget.style.background = '#029c91')}>
+          onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--teal-80)')}
+          onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--teal)')}>
           Save
         </button>
       </div>
