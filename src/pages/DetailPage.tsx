@@ -95,13 +95,16 @@ export default function DetailPage() {
 
               {/* Edited / Created metadata */}
               {/* DEV: use <TextMeta> / <InlineMetadata> or equivalent admin UI component */}
-              <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
-                <span style={{ fontSize: 12, color: 'var(--grey3)' }}>
-                  Edited on {formatDate(automation.editedOn)} by {automation.editedBy}
-                </span>
-                <span style={{ fontSize: 12, color: 'var(--grey3)' }}>
-                  Created on {formatDate(automation.createdOn)} by {automation.createdBy}
-                </span>
+              <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap', marginTop: 2 }}>
+                <span style={{ fontSize: 12, color: 'var(--grey3)' }}>Edited on</span>
+                <span style={{ fontSize: 12, color: 'var(--grey2)', fontWeight: 500 }}>{formatDate(automation.editedOn)}</span>
+                <span style={{ fontSize: 12, color: 'var(--grey3)' }}>by</span>
+                <span style={{ fontSize: 12, color: 'var(--teal)', fontWeight: 500 }}>{automation.editedBy}</span>
+                <span style={{ fontSize: 12, color: 'var(--grey4)', margin: '0 4px' }}>·</span>
+                <span style={{ fontSize: 12, color: 'var(--grey3)' }}>Created on</span>
+                <span style={{ fontSize: 12, color: 'var(--grey2)', fontWeight: 500 }}>{formatDate(automation.createdOn)}</span>
+                <span style={{ fontSize: 12, color: 'var(--grey3)' }}>by</span>
+                <span style={{ fontSize: 12, color: 'var(--teal)', fontWeight: 500 }}>{automation.createdBy}</span>
               </div>
             </div>
 

@@ -24,7 +24,7 @@ export const automations: Automation[] = [
     editedOn: '2025-11-14T10:30:00Z',
     editedBy: 'Maria Rossi',
     createdOn: '2025-03-10T09:00:00Z',
-    createdBy: 'Admin',
+    createdBy: 'Francesco Papetti',
     status: 'active',
     hasErrors: false,
     enrolledTotal: 1240,
