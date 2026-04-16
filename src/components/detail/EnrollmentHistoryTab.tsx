@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Run } from '../../data/runs'
-import WhyDidEnrollPanel from './WhyDidEnrollPanel'
 
 function formatDateTime(iso: string) {
   return new Date(iso).toLocaleString('en-GB', {
@@ -33,7 +32,6 @@ export default function EnrollmentHistoryTab({ runs }: Props) {
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const [dateRange, setDateRange] = useState<DateRange>('30d')
-  const [panelRun, setPanelRun] = useState<Run | null>(null)
 
   const sorted = useMemo(() =>
     [...runs].sort((a, b) => new Date(b.enrolledAt).getTime() - new Date(a.enrolledAt).getTime()),
@@ -132,10 +130,7 @@ export default function EnrollmentHistoryTab({ runs }: Props) {
             ) : (
               filtered.map(run => {
                 const triggerStep = run.steps.find(s => s.type === 'trigger')
-                const triggerOutcome = triggerStep?.outcome ?? 'success'
-                const outcomeColor = triggerOutcome === 'success' ? 'var(--teal)' : 'var(--red)'
-                const outcomeLabel = triggerOutcome === 'success' ? 'Success' : 'Failed'
-                const borderLeft = triggerOutcome === 'failed' ? '4px solid var(--red)' : '4px solid var(--grey2)'
+                const borderLeft = triggerStep?.outcome === 'failed' ? '4px solid var(--red)' : '4px solid var(--grey2)'
                 return (
                 <tr
                   key={run.id}
@@ -166,31 +161,15 @@ export default function EnrollmentHistoryTab({ runs }: Props) {
                     <div style={{ fontSize: 12, color: 'var(--grey3)' }}>{run.userEmail}</div>
                   </td>
 
-                  {/* Trigger — matches Action Logs trigger row pattern */}
+                  {/* Trigger */}
+                  {/* DEV: use <LogRow>, <TextMeta> or equivalent admin UI components */}
                   <td style={{ padding: '10px 16px', verticalAlign: 'middle' }}>
-                        <div style={{ fontSize: 13, color: 'var(--grey1)' }}>
-                          {run.triggerEvent}
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
-                          <span style={{ fontSize: 8, color: outcomeColor }}>●</span>
-                          <span style={{ fontSize: 12, color: outcomeColor, fontWeight: 500 }}>{outcomeLabel}</span>
-                          <span style={{ color: 'var(--grey4)' }}>·</span>
-                          {/* DEV: use <TextButton> */}
-                          <button
-                            onClick={() => setPanelRun(run)}
-                            style={{
-                              fontSize: 12,
-                              color: 'var(--grey2)',
-                              cursor: 'pointer',
-                              textDecoration: 'underline',
-                              background: 'transparent',
-                              border: 'none',
-                              padding: 0,
-                            }}
-                          >
-                            Why did this enroll?
-                          </button>
-                        </div>
+                    <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--grey1)' }}>
+                      {run.triggerEvent}
+                    </div>
+                    <div style={{ fontSize: 12, color: 'var(--grey3)', marginTop: 2 }}>
+                      Trigger
+                    </div>
                   </td>
 
                   {/* Enrolled at */}
@@ -205,9 +184,6 @@ export default function EnrollmentHistoryTab({ runs }: Props) {
         </table>
       </div>
 
-      {panelRun && (
-        <WhyDidEnrollPanel run={panelRun} onClose={() => setPanelRun(null)} />
-      )}
     </>
   )
 }

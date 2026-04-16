@@ -82,40 +82,26 @@ export default function DetailPage() {
           }}>
             <div>
               {/* DEV: use <PageTitle> */}
-              <h1 style={{ fontSize: 22, fontWeight: 500, color: 'var(--grey1)', margin: '0 0 10px', lineHeight: 1.2 }}>
-                {automation.name}
-              </h1>
-
-              {/* Status pills */}
-              {/* DEV: use <StatusPill> for each pill */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-
-                {/* Workflow ON/OFF pill */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                 <span style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 6,
-                  fontSize: 13, color: automation.status === 'active' ? 'var(--teal)' : 'var(--grey3)',
-                }}>
-                  <span style={{
-                    width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
-                    background: automation.status === 'active' ? 'var(--teal)' : 'var(--grey4)',
-                    boxShadow: automation.status === 'active' ? '0 0 0 2px var(--light-teal)' : 'none',
-                  }} />
-                  {automation.status === 'active' ? 'Workflow is ON' : 'Workflow is OFF'}
-                </span>
+                  width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
+                  background: automation.status === 'active' ? 'var(--teal)' : 'var(--grey4)',
+                  boxShadow: automation.status === 'active' ? '0 0 0 2px var(--light-teal)' : 'none',
+                }} />
+                <h1 style={{ fontSize: 22, fontWeight: 500, color: 'var(--grey1)', margin: 0, lineHeight: 1.2 }}>
+                  {automation.name}
+                </h1>
+              </div>
 
-                {/* Error pill */}
-                <span style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 6,
-                  fontSize: 13, color: automation.hasErrors ? 'var(--red)' : 'var(--teal)',
-                }}>
-                  <span style={{
-                    width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
-                    background: automation.hasErrors ? 'var(--red)' : 'var(--teal)',
-                    boxShadow: automation.hasErrors ? 'none' : '0 0 0 2px var(--light-teal)',
-                  }} />
-                  {automation.hasErrors ? 'Workflow has errors' : 'Workflow without issues'}
+              {/* Edited / Created metadata */}
+              {/* DEV: use <TextMeta> / <InlineMetadata> or equivalent admin UI component */}
+              <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 12, color: 'var(--grey3)' }}>
+                  Edited on {formatDate(automation.editedOn)} by {automation.editedBy}
                 </span>
-
+                <span style={{ fontSize: 12, color: 'var(--grey3)' }}>
+                  Created on {formatDate(automation.createdOn)} by {automation.createdBy}
+                </span>
               </div>
             </div>
 
@@ -161,38 +147,6 @@ export default function DetailPage() {
               )
             })}
           </div>
-        </div>
-
-        {/* ── Metadata bar ─────────────────────────────────────────────────────── */}
-        {/* DEV: use <MetadataBar> or equivalent admin UI component */}
-        <div style={{
-          background: 'var(--grey7)',
-          borderBottom: '1px solid var(--grey5)',
-          padding: '14px 32px',
-          display: 'flex', flexWrap: 'wrap', gap: '12px 40px',
-          flexShrink: 0,
-        }}>
-          {[
-            { label: 'Enrolled total',       value: automation.enrolledTotal.toLocaleString() },
-            { label: 'Enrolled last 7 days', value: automation.enrolledLast7Days !== null ? automation.enrolledLast7Days.toLocaleString() : '—' },
-            { label: 'Updated on',           value: formatDate(automation.editedOn) },
-            { label: 'Updated by',           value: automation.editedBy },
-            { label: 'Created on',           value: formatDate(automation.createdOn) },
-            { label: 'Created by',           value: 'Francesco Papetti' },
-          ].map(({ label, value }) => (
-            <div key={label} style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
-              <span style={{
-                fontSize: 11, color: 'var(--grey3)',
-                textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 500,
-                whiteSpace: 'nowrap',
-              }}>
-                {label}
-              </span>
-              <span style={{ fontSize: 13, color: 'var(--grey1)', fontWeight: 500, whiteSpace: 'nowrap' }}>
-                {value}
-              </span>
-            </div>
-          ))}
         </div>
 
         {/* ── Tab content ──────────────────────────────────────────────────────── */}

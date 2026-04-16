@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Run } from '../../data/runs'
-import WhyDidEnrollPanel from './WhyDidEnrollPanel'
 
 function formatDateTime(iso: string) {
   return new Date(iso).toLocaleString('en-GB', {
@@ -24,6 +23,39 @@ interface LogRow {
   errorMessage: string | null
   timestamp: string
   run: Run
+}
+
+// DEV: use <Tooltip> / <IconButton> / <InlineHelpIcon>
+function HelpIcon({ message }: { message: string }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <span
+      style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+    >
+      <span style={{
+        width: 14, height: 14, borderRadius: '50%',
+        border: '1px solid var(--red)', color: 'var(--red)',
+        fontSize: 10, fontWeight: 700, cursor: 'default',
+        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+        lineHeight: 1, flexShrink: 0,
+      }}>?</span>
+      {open && (
+        <div style={{
+          position: 'absolute', bottom: 'calc(100% + 6px)', left: '50%',
+          transform: 'translateX(-50%)',
+          background: 'var(--grey1)', color: '#fff',
+          fontSize: 12, lineHeight: 1.5, padding: '6px 10px',
+          borderRadius: 4, whiteSpace: 'normal', width: 240,
+          zIndex: 100, pointerEvents: 'none',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
+        }}>
+          {message}
+        </div>
+      )}
+    </span>
+  )
 }
 
 function buildRows(runs: Run[]): LogRow[] {
@@ -61,7 +93,7 @@ function buildRows(runs: Run[]): LogRow[] {
     actionSteps.forEach((step, idx) => {
       rows.push({
         ...base,
-        rowType: step.type,
+        rowType: step.type as 'action' | 'branch',
         stepIndex: idx + 1,
         label: step.label,
         outcome: step.outcome,
@@ -86,6 +118,64 @@ function buildRows(runs: Run[]): LogRow[] {
   })
 }
 
+function rowTypeLabel(rowType: LogRow['rowType']): string {
+  if (rowType === 'trigger') return 'Trigger'
+  if (rowType === 'action') return 'Action'
+  if (rowType === 'branch') return 'Automation control'
+  return ''
+}
+
+function rowVisual(row: LogRow) {
+  if (row.rowType === 'completion') return { borderLeft: '4px solid transparent', background: 'white' }
+  if (row.outcome === 'failed') return { borderLeft: '4px solid var(--red)', background: 'white' }
+  if (row.rowType === 'trigger') return { borderLeft: '4px solid var(--grey2)', background: 'var(--grey7)' }
+  return { borderLeft: '4px solid var(--grey4)', background: 'white' }
+}
+
+// DEV: use <LogRow>, <TextMeta>, <StatusInline> or equivalent admin UI components
+function EventCell({ row }: { row: LogRow }) {
+  if (row.rowType === 'completion') {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span aria-hidden="true" style={{ display: 'inline-flex' }}>
+          <svg width="18" height="18" viewBox="0 0 18 18" style={{ display: 'block' }}>
+            <circle cx="9" cy="9" r="8" fill="var(--completed)" />
+            <path d="M5 9.2 7.6 12 13 6" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </span>
+        <span style={{ fontSize: 13, color: 'var(--teal)', fontWeight: 500 }}>
+          Completed automation
+        </span>
+      </div>
+    )
+  }
+
+  const isFailed = row.outcome === 'failed'
+  const showFailed = isFailed && (row.rowType === 'action' || row.rowType === 'branch')
+
+  return (
+    <div>
+      {/* Primary: action/trigger name */}
+      <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--grey1)' }}>
+        {row.label}
+      </div>
+      {/* Secondary: type label + failed feedback */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
+        <span style={{ fontSize: 12, color: 'var(--grey3)' }}>
+          {rowTypeLabel(row.rowType)}
+        </span>
+        {showFailed && (
+          <>
+            <span style={{ color: 'var(--grey4)', fontSize: 12 }}>·</span>
+            <span style={{ fontSize: 12, color: 'var(--red)', fontWeight: 500 }}>Failed</span>
+            {row.errorMessage && <HelpIcon message={row.errorMessage} />}
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
 interface Props { runs: Run[] }
 
 export default function ActionLogsTab({ runs }: Props) {
@@ -94,12 +184,9 @@ export default function ActionLogsTab({ runs }: Props) {
   const [eventFilter, setEventFilter] = useState<string>('all')
   const [viewMode, setViewMode] = useState<'contact' | 'timeline'>('contact')
   const [search, setSearch] = useState('')
-  const [expandedErrors, setExpandedErrors] = useState<Set<string>>(new Set())
-  const [panelRun, setPanelRun] = useState<Run | null>(null)
 
   const allRows = useMemo(() => buildRows(runs), [runs])
 
-  // Build grouped event options from actual data
   const eventOptions = useMemo(() => {
     const triggers = new Set<string>()
     const actions = new Set<string>()
@@ -123,15 +210,6 @@ export default function ActionLogsTab({ runs }: Props) {
     return rows
   }, [allRows, outcomeFilter, eventFilter, search])
 
-  const toggleError = (key: string) => {
-    setExpandedErrors(prev => {
-      const next = new Set(prev)
-      next.has(key) ? next.delete(key) : next.add(key)
-      return next
-    })
-  }
-
-  // Group rows by runId for "By contact" view
   const runGroups = useMemo(() => {
     const groups: Record<string, LogRow[]> = {}
     const order: string[] = []
@@ -142,7 +220,6 @@ export default function ActionLogsTab({ runs }: Props) {
     return order.map(id => groups[id])
   }, [filtered])
 
-  // Flat rows sorted by step timestamp for Timeline view (no completion rows)
   const timelineRows = useMemo(() =>
     filtered
       .filter(r => r.rowType !== 'completion')
@@ -150,22 +227,6 @@ export default function ActionLogsTab({ runs }: Props) {
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()),
     [filtered]
   )
-
-  const outcomeColor = (o: string) => o === 'success' ? 'var(--teal)' : 'var(--red)'
-  const outcomeLabel = (o: string) => o === 'success' ? 'Success' : 'Failed'
-
-  const rowVisual = (row: LogRow) => {
-    if (row.rowType === 'completion') {
-      return { borderLeft: '4px solid transparent', background: 'white' }
-    }
-    if (row.outcome === 'failed') {
-      return { borderLeft: '4px solid var(--red)', background: 'white' }
-    }
-    if (row.rowType === 'trigger') {
-      return { borderLeft: '4px solid var(--grey2)', background: 'var(--grey7)' }
-    }
-    return { borderLeft: '4px solid var(--grey4)', background: 'white' }
-  }
 
   return (
     <>
@@ -243,10 +304,10 @@ export default function ActionLogsTab({ runs }: Props) {
           type="button"
           onClick={() => {}}
           style={{
-          height: 34, padding: '0 14px',
-          border: '1px solid var(--grey5)', borderRadius: 4,
-          fontSize: 13, color: 'var(--grey2)', background: 'white', cursor: 'pointer',
-        }}
+            height: 34, padding: '0 14px',
+            border: '1px solid var(--grey5)', borderRadius: 4,
+            fontSize: 13, color: 'var(--grey2)', background: 'white', cursor: 'pointer',
+          }}
         >
           Export CSV
         </button>
@@ -286,244 +347,75 @@ export default function ActionLogsTab({ runs }: Props) {
             ) : viewMode === 'timeline' ? (
               timelineRows.map(row => {
                 const rowKey = `${row.runId}-${row.stepIndex}`
-                const isFailed = row.outcome === 'failed'
-                const errorExpanded = expandedErrors.has(rowKey)
                 const visual = rowVisual(row)
                 return (
-                  <>
-                    <tr
-                      key={rowKey}
-                      style={{
-                        borderBottom: '1px solid var(--grey6)',
-                        borderLeft: visual.borderLeft,
-                        background: visual.background,
-                      }}
-                    >
-                      {/* Contact — always visible in timeline view */}
-                      <td style={{ padding: '10px 16px', verticalAlign: 'top' }}>
-                        <div>
-                          {/* DEV: link to user profile */}
-                          <button
-                            onClick={() => navigate(`/user/${row.userId}`)}
-                            style={{ fontSize: 13, color: 'var(--teal)', fontWeight: 500, cursor: 'pointer', display: 'block' }}
-                          >
-                            {row.userName}
-                          </button>
-                          <div style={{ fontSize: 12, color: 'var(--grey3)' }}>{row.userEmail}</div>
-                        </div>
-                      </td>
-                      {/* Event */}
-                      <td style={{ padding: '10px 16px', verticalAlign: 'middle', minWidth: 0 }}>
-                        <div>
-                          <div style={{ fontSize: 13, color: 'var(--grey1)' }}>
-                            {row.rowType === 'trigger' && (
-                              <><span style={{ fontWeight: 600, letterSpacing: '0.04em' }}>TRIGGER:</span> {row.label}</>
-                            )}
-                            {row.rowType === 'action' && (
-                              <><span style={{ fontWeight: 600, letterSpacing: '0.04em' }}>ACTION:</span> {row.label}</>
-                            )}
-                            {row.rowType === 'branch' && (
-                              <><span style={{ fontWeight: 600, letterSpacing: '0.04em' }}>CONTROL:</span> {row.label}</>
-                            )}
-                          </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
-                            <span style={{ fontSize: 8, color: outcomeColor(row.outcome) }}>●</span>
-                            <span style={{ fontSize: 12, color: outcomeColor(row.outcome), fontWeight: 500 }}>
-                              {outcomeLabel(row.outcome)}
-                            </span>
-                            {row.rowType === 'trigger' && (
-                              <>
-                                <span style={{ color: 'var(--grey4)' }}>·</span>
-                                <button
-                                  onClick={() => setPanelRun(row.run)}
-                                  style={{ fontSize: 12, color: 'var(--grey2)', cursor: 'pointer', textDecoration: 'underline', background: 'transparent', border: 'none', padding: 0 }}
-                                >
-                                  Why did this enroll?
-                                </button>
-                              </>
-                            )}
-                            {isFailed && row.errorMessage && (
-                              <button
-                                onClick={() => toggleError(rowKey)}
-                                style={{ fontSize: 11, color: 'var(--red)', marginLeft: 4, cursor: 'pointer', textDecoration: 'underline' }}
-                              >
-                                {errorExpanded ? 'Hide details' : 'Show details'}
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-                      {/* Time */}
-                      <td style={{ padding: '10px 16px', fontSize: 12, color: 'var(--grey3)', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
-                        {formatDateTime(row.timestamp)}
-                      </td>
-                    </tr>
-                    {isFailed && errorExpanded && row.errorMessage && (
-                      <tr key={`${rowKey}-error`} style={{ borderBottom: '1px solid var(--grey6)', borderLeft: '4px solid var(--red)', background: 'var(--notification-bg)' }}>
-                        <td style={{ padding: '10px 16px 14px' }} />
-                        <td colSpan={2} style={{ padding: '10px 16px 14px' }}>
-                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '10px 14px', background: 'white', border: '1px solid var(--notification-border)', borderRadius: 4, maxWidth: 520, boxSizing: 'border-box' }}>
-                            <span style={{ color: 'var(--red)', fontSize: 14, flexShrink: 0, fontWeight: 700 }}>!</span>
-                            <span style={{ fontSize: 13, color: 'var(--grey1)', lineHeight: 1.5, minWidth: 0, overflowWrap: 'anywhere', wordBreak: 'break-word' }}>{row.errorMessage}</span>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </>
+                  <tr
+                    key={rowKey}
+                    style={{
+                      borderBottom: '1px solid var(--grey6)',
+                      borderLeft: visual.borderLeft,
+                      background: visual.background,
+                    }}
+                  >
+                    <td style={{ padding: '10px 16px', verticalAlign: 'top' }}>
+                      <div>
+                        {/* DEV: link to user profile */}
+                        <button
+                          onClick={() => navigate(`/user/${row.userId}`)}
+                          style={{ fontSize: 13, color: 'var(--teal)', fontWeight: 500, cursor: 'pointer', display: 'block' }}
+                        >
+                          {row.userName}
+                        </button>
+                        <div style={{ fontSize: 12, color: 'var(--grey3)' }}>{row.userEmail}</div>
+                      </div>
+                    </td>
+                    <td style={{ padding: '10px 16px', verticalAlign: 'middle', minWidth: 0 }}>
+                      <EventCell row={row} />
+                    </td>
+                    <td style={{ padding: '10px 16px', fontSize: 12, color: 'var(--grey3)', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                      {formatDateTime(row.timestamp)}
+                    </td>
+                  </tr>
                 )
               })
             ) : (
               runGroups.map((group) => (
                 group.map((row, ri) => {
                   const rowKey = `${row.runId}-${row.stepIndex}`
-                  const isFailed = row.outcome === 'failed'
-                  const errorExpanded = expandedErrors.has(rowKey)
                   const isGroupStart = ri === 0
                   const isGroupEnd = ri === group.length - 1
                   const visual = rowVisual(row)
 
                   return (
-                    <>
-                      <tr
-                        key={rowKey}
-                        style={{
-                          borderBottom: isGroupEnd ? '2px solid var(--grey5)' : '1px solid var(--grey6)',
-                          borderLeft: visual.borderLeft,
-                          background: visual.background,
-                        }}
-                      >
-                        {/* Contact — only show on first row of group */}
-                        <td style={{ padding: '10px 16px', verticalAlign: 'top' }}>
-                          {isGroupStart && (
-                            <div style={{ padding: '6px 8px', borderRadius: 4 }}>
-                              {/* DEV: link to user profile */}
-                              <button
-                                onClick={() => navigate(`/user/${row.userId}`)}
-                                style={{ fontSize: 13, color: 'var(--teal)', fontWeight: 500, cursor: 'pointer', display: 'block' }}
-                              >
-                                {row.userName}
-                              </button>
-                              <div style={{ fontSize: 12, color: 'var(--grey3)' }}>{row.userEmail}</div>
-                            </div>
-                          )}
-                        </td>
-
-                        {/* Event (includes action details) */}
-                        <td style={{ padding: '10px 16px', verticalAlign: 'middle', minWidth: 0 }}>
-                          <div>
-                            {/* DEV: trigger/action visual mapping */}
-                            {row.rowType === 'completion' ? (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                <span aria-hidden="true" style={{ display: 'inline-flex' }}>
-                                  <svg
-                                    width="18"
-                                    height="18"
-                                    viewBox="0 0 18 18"
-                                    style={{ display: 'block' }}
-                                  >
-                                    <circle cx="9" cy="9" r="8" fill="var(--completed)" />
-                                    <path
-                                      d="M5 9.2 7.6 12 13 6"
-                                      fill="none"
-                                      stroke="white"
-                                      strokeWidth="1.8"
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                    />
-                                  </svg>
-                                </span>
-                                <span style={{ fontSize: 13, color: 'var(--teal)', fontWeight: 500 }}>
-                                  Completed workflow
-                                </span>
-                              </div>
-                            ) : (
-                              <>
-                                <div style={{ fontSize: 13, color: 'var(--grey1)' }}>
-                                  {row.rowType === 'trigger' && (
-                                    <><span style={{ fontWeight: 600, letterSpacing: '0.04em' }}>TRIGGER:</span> {row.label}</>
-                                  )}
-                                  {row.rowType === 'action' && (
-                                    <><span style={{ fontWeight: 600, letterSpacing: '0.04em' }}>ACTION:</span> {row.label}</>
-                                  )}
-                                  {row.rowType === 'branch' && (
-                                    <><span style={{ fontWeight: 600, letterSpacing: '0.04em' }}>CONTROL:</span> {row.label}</>
-                                  )}
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
-                                  <span style={{ fontSize: 8, color: outcomeColor(row.outcome) }}>●</span>
-                                  <span style={{ fontSize: 12, color: outcomeColor(row.outcome), fontWeight: 500 }}>
-                                    {outcomeLabel(row.outcome)}
-                                  </span>
-                                  {row.rowType === 'trigger' && (
-                                    <>
-                                      <span style={{ color: 'var(--grey4)' }}>·</span>
-                                      {/* DEV: use <TextButton> or <IconButton> */}
-                                      <button
-                                        onClick={() => setPanelRun(row.run)}
-                                        style={{
-                                          fontSize: 12,
-                                          color: 'var(--grey2)',
-                                          cursor: 'pointer',
-                                          textDecoration: 'underline',
-                                          background: 'transparent',
-                                          border: 'none',
-                                          padding: 0,
-                                        }}
-                                      >
-                                        Why did this enroll?
-                                      </button>
-                                    </>
-                                  )}
-                                  {isFailed && row.errorMessage && (
-                                    <button
-                                      onClick={() => toggleError(rowKey)}
-                                      style={{ fontSize: 11, color: 'var(--red)', marginLeft: 4, cursor: 'pointer', textDecoration: 'underline' }}
-                                    >
-                                      {errorExpanded ? 'Hide details' : 'Show details'}
-                                    </button>
-                                  )}
-                                </div>
-                              </>
-                            )}
+                    <tr
+                      key={rowKey}
+                      style={{
+                        borderBottom: isGroupEnd ? '2px solid var(--grey5)' : '1px solid var(--grey6)',
+                        borderLeft: visual.borderLeft,
+                        background: visual.background,
+                      }}
+                    >
+                      <td style={{ padding: '10px 16px', verticalAlign: 'top' }}>
+                        {isGroupStart && (
+                          <div style={{ padding: '6px 8px', borderRadius: 4 }}>
+                            {/* DEV: link to user profile */}
+                            <button
+                              onClick={() => navigate(`/user/${row.userId}`)}
+                              style={{ fontSize: 13, color: 'var(--teal)', fontWeight: 500, cursor: 'pointer', display: 'block' }}
+                            >
+                              {row.userName}
+                            </button>
+                            <div style={{ fontSize: 12, color: 'var(--grey3)' }}>{row.userEmail}</div>
                           </div>
-                        </td>
-
-                        {/* Time */}
-                        <td style={{ padding: '10px 16px', fontSize: 12, color: 'var(--grey3)', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
-                          {formatDateTime(row.timestamp)}
-                        </td>
-                      </tr>
-
-                      {/* Expanded error row */}
-                      {isFailed && errorExpanded && row.errorMessage && (
-                        <tr
-                          key={`${rowKey}-error`}
-                          style={{
-                            borderBottom: '1px solid var(--grey6)',
-                            borderLeft: '4px solid var(--red)',
-                            background: 'white',
-                          }}
-                        >
-                          {/* Keep table grid, align content to Event column */}
-                          <td style={{ padding: '10px 16px 14px' }} />
-                          <td colSpan={2} style={{ padding: '10px 16px 14px' }}>
-                            <div style={{
-                              display: 'flex', alignItems: 'flex-start', gap: 8,
-                              padding: '10px 14px', background: 'white',
-                              border: '1px solid var(--notification-border)', borderRadius: 4,
-                              width: '100%',
-                              maxWidth: 520,
-                              boxSizing: 'border-box',
-                            }}>
-                              <span style={{ color: 'var(--red)', fontSize: 14, flexShrink: 0, fontWeight: 700 }}>!</span>
-                              <span style={{ fontSize: 13, color: 'var(--grey1)', lineHeight: 1.5, minWidth: 0, overflowWrap: 'anywhere', wordBreak: 'break-word' }}>
-                                {row.errorMessage}
-                              </span>
-                            </div>
-                          </td>
-                        </tr>
-                      )}
-                    </>
+                        )}
+                      </td>
+                      <td style={{ padding: '10px 16px', verticalAlign: 'middle', minWidth: 0 }}>
+                        <EventCell row={row} />
+                      </td>
+                      <td style={{ padding: '10px 16px', fontSize: 12, color: 'var(--grey3)', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                        {formatDateTime(row.timestamp)}
+                      </td>
+                    </tr>
                   )
                 })
               ))
@@ -531,10 +423,6 @@ export default function ActionLogsTab({ runs }: Props) {
           </tbody>
         </table>
       </div>
-
-      {panelRun && (
-        <WhyDidEnrollPanel run={panelRun} onClose={() => setPanelRun(null)} />
-      )}
     </>
   )
 }
