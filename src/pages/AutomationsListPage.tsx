@@ -18,7 +18,7 @@ function formatDateTime(iso: string) {
 }
 
 // ── Column layout ─────────────────────────────────────────────────────────────
-const GRID_COLS = '28px 1fr 150px 190px 100px 100px 120px 44px'
+const GRID_COLS = '1fr 150px 190px 100px 100px 120px 44px'
 const P = '0 12px'
 
 // ── GroupLabel ─────────────────────────────────────────────────────────────────
@@ -224,15 +224,17 @@ function AutomationRow({ automation }: { automation: Automation }) {
         transition: 'background 0.1s',
       }}
     >
-      {/* dot-menu */}
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{ padding: '0 4px 0 8px', display: 'flex', alignItems: 'center', visibility: hovered ? 'visible' : 'hidden' }}
-      >
-        <ThreeDotMenu automation={automation} />
-      </div>
-      {/* Automation title — up to 3 lines */}
-      <div style={{ padding: P, display: 'flex', alignItems: 'center', gap: 7, minWidth: 0 }}>
+      {/* Automation title — up to 3 lines; dot-menu overlaid on hover */}
+      <div style={{ padding: P, display: 'flex', alignItems: 'center', gap: 7, minWidth: 0, position: 'relative' }}>
+        {/* dot-menu: absolute overlay on hover */}
+        {hovered && (
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{ position: 'absolute', left: -2, top: '50%', transform: 'translateY(-50%)', zIndex: 2 }}
+          >
+            <ThreeDotMenu automation={automation} />
+          </div>
+        )}
         {/* DEV: use <StatusBadge variant="error"> when hasErrors */}
         {automation.hasErrors && (
           <div
@@ -652,7 +654,6 @@ function MyAutomationsTab() {
           paddingBottom: 8,
           borderBottom: '1px solid var(--grey5)',
         }}>
-          <div />
           <div style={{ padding: P, fontSize: 13, fontWeight: 500, color: 'var(--grey3)' }}>Automation title</div>
           <div style={{ padding: P, fontSize: 13, fontWeight: 500, color: 'var(--grey3)' }}>When</div>
           <div style={{ padding: P, fontSize: 13, fontWeight: 500, color: 'var(--grey3)' }}>Then</div>
