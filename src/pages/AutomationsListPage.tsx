@@ -18,8 +18,8 @@ function formatDateTime(iso: string) {
 }
 
 // ── Column layout ─────────────────────────────────────────────────────────────
-const GRID_COLS = '40px 1fr 160px 200px 110px 110px 130px 56px'
-const P = '0 16px'
+const GRID_COLS = '28px 1fr 150px 190px 100px 100px 120px 44px'
+const P = '0 12px'
 
 // ── GroupLabel ─────────────────────────────────────────────────────────────────
 function GroupLabel({ group }: { group: string | null }) {
@@ -54,12 +54,12 @@ function GroupLabel({ group }: { group: string | null }) {
 // ── ActionChip ────────────────────────────────────────────────────────────────
 function ActionChip({ label }: { label: string }) {
   return (
-    /* DEV: use <Chips.SingleChip label={label} variant="action"> */
+    /* DEV: use <Chips.SingleChip label={label}> */
     <span style={{
       display: 'inline-flex', alignItems: 'center',
-      padding: '3px 8px', borderRadius: 4,
-      fontSize: 12, fontWeight: 400,
-      background: 'var(--light-teal)', color: 'var(--teal)',
+      padding: '4px 8px', borderRadius: 4,
+      fontSize: 13, fontWeight: 400,
+      background: 'var(--grey7)', color: 'var(--grey2)',
       whiteSpace: 'nowrap', maxWidth: 180,
       overflow: 'hidden', textOverflow: 'ellipsis',
     }}>
@@ -513,7 +513,7 @@ function AutomationLogsTab() {
                           {showFailed ? (
                             <>
                               <span style={{ fontSize: 12, color: 'var(--red)', fontWeight: 500 }}>
-                                {stepTypeLabel(row.stepType)} · Failed
+                                {stepTypeLabel(row.stepType)} Failed
                               </span>
                               {row.errorMessage && <HelpIcon message={row.errorMessage} />}
                             </>

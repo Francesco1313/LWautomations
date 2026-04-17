@@ -50,7 +50,7 @@ export const automations: Automation[] = [
   },
   {
     id: 'auto-003',
-    name: 'Abandoned cart follow-up',
+    name: 'Streamline re-engagement with cart abandonment follow-up',
     group: 'Sales',
     trigger: 'User abandons cart',
     actions: ['Send reminder email', 'Offer 10% discount'],
@@ -98,7 +98,7 @@ export const automations: Automation[] = [
   },
   {
     id: 'auto-006',
-    name: 'New instructor onboarding',
+    name: 'INT-2089 - New instructor onboarding and welcome workflow setup',
     group: 'Onboarding',
     trigger: 'Instructor account created',
     actions: ['Create instructor profile', 'Send welcome kit'],
@@ -114,7 +114,7 @@ export const automations: Automation[] = [
   },
   {
     id: 'auto-007',
-    name: 'Upsell premium membership',
+    name: 'Enhance conversion with premium membership upsell campaign',
     group: 'Sales',
     trigger: 'User finishes free course',
     actions: ['Send upsell email', 'Add to premium leads'],

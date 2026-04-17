@@ -161,15 +161,17 @@ function EventCell({ row }: { row: LogRow }) {
       </div>
       {/* Secondary: type label + failed feedback */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
-        <span style={{ fontSize: 12, color: 'var(--grey3)' }}>
-          {rowTypeLabel(row.rowType)}
-        </span>
-        {showFailed && (
+        {showFailed ? (
           <>
-            <span style={{ color: 'var(--grey4)', fontSize: 12 }}>·</span>
-            <span style={{ fontSize: 12, color: 'var(--red)', fontWeight: 500 }}>Failed</span>
+            <span style={{ fontSize: 12, color: 'var(--red)', fontWeight: 500 }}>
+              {rowTypeLabel(row.rowType)} Failed
+            </span>
             {row.errorMessage && <HelpIcon message={row.errorMessage} />}
           </>
+        ) : (
+          <span style={{ fontSize: 12, color: 'var(--grey3)' }}>
+            {rowTypeLabel(row.rowType)}
+          </span>
         )}
       </div>
     </div>
