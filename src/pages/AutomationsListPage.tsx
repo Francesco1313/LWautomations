@@ -241,8 +241,12 @@ function AutomationRow({ automation }: { automation: Automation }) {
       <div style={{ padding: P, display: 'flex', alignItems: 'center', overflow: 'hidden' }}>
         <TriggerChip label={automation.trigger} />
       </div>
-      <div style={{ padding: P, display: 'flex', alignItems: 'center' }}>
-        <span style={{ fontSize: 13, color: 'var(--grey2)' }}>
+      {/* Times executed — teal, clickable → view activity */}
+      <div
+        onClick={(e) => { e.stopPropagation(); navigate(`/detail/${automation.id}`) }}
+        style={{ padding: P, display: 'flex', alignItems: 'center' }}
+      >
+        <span style={{ fontSize: 13, color: 'var(--teal)', fontWeight: 500, cursor: 'pointer' }}>
           {automation.timesExecuted.toLocaleString()}
         </span>
       </div>
@@ -412,7 +416,7 @@ function AutomationLogsTab() {
             fontSize: 13, color: 'var(--grey2)', background: 'white', cursor: 'pointer',
           }}
         >
-          Export CSV
+          Export full CSV
         </button>
       </div>
 
@@ -451,11 +455,9 @@ function AutomationLogsTab() {
               filtered.map((row, i) => {
                 const isFailed = row.outcome === 'failed'
                 const showFailed = isFailed && (row.stepType === 'action' || row.stepType === 'branch')
-                const borderLeft = isFailed && row.stepType !== 'trigger'
+                const borderLeft = showFailed
                   ? '4px solid var(--red)'
-                  : row.stepType === 'trigger'
-                    ? '4px solid var(--grey2)'
-                    : '4px solid var(--grey4)'
+                  : '4px solid var(--grey2)'
                 return (
                   <tr
                     key={i}
