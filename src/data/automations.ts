@@ -3,6 +3,7 @@ export interface Automation {
   name: string
   group: string | null
   trigger: string
+  actions: string[]
   timesExecuted: number
   editedOn: string
   editedBy: string
@@ -20,6 +21,7 @@ export const automations: Automation[] = [
     name: 'Welcome email on signup',
     group: 'Onboarding',
     trigger: 'User signs up',
+    actions: ['Send welcome email', 'Enroll in onboarding course'],
     timesExecuted: 1240,
     editedOn: '2025-11-14T10:30:00Z',
     editedBy: 'Maria Rossi',
@@ -35,6 +37,7 @@ export const automations: Automation[] = [
     name: 'Course completion reward',
     group: 'Engagement',
     trigger: 'Course completed',
+    actions: ['Award badge', 'Send congratulations email'],
     timesExecuted: 845,
     editedOn: '2025-12-02T14:15:00Z',
     editedBy: 'Luca Bianchi',
@@ -50,6 +53,7 @@ export const automations: Automation[] = [
     name: 'Abandoned cart follow-up',
     group: 'Sales',
     trigger: 'User abandons cart',
+    actions: ['Send reminder email', 'Offer 10% discount'],
     timesExecuted: 312,
     editedOn: '2025-10-28T09:00:00Z',
     editedBy: 'Admin',
@@ -65,6 +69,7 @@ export const automations: Automation[] = [
     name: 'Monthly newsletter digest',
     group: null,
     trigger: 'Scheduled monthly',
+    actions: ['Send newsletter', 'Track opens'],
     timesExecuted: 24,
     editedOn: '2025-12-15T16:45:00Z',
     editedBy: 'Maria Rossi',
@@ -80,6 +85,7 @@ export const automations: Automation[] = [
     name: 'Re-engagement campaign',
     group: 'Engagement',
     trigger: 'User inactive for 30 days',
+    actions: ['Send re-engagement email', 'Offer free lesson'],
     timesExecuted: 560,
     editedOn: '2025-11-20T11:00:00Z',
     editedBy: 'Luca Bianchi',
@@ -95,6 +101,7 @@ export const automations: Automation[] = [
     name: 'New instructor onboarding',
     group: 'Onboarding',
     trigger: 'Instructor account created',
+    actions: ['Create instructor profile', 'Send welcome kit'],
     timesExecuted: 78,
     editedOn: '2025-09-05T13:30:00Z',
     editedBy: 'Admin',
@@ -110,6 +117,7 @@ export const automations: Automation[] = [
     name: 'Upsell premium membership',
     group: 'Sales',
     trigger: 'User finishes free course',
+    actions: ['Send upsell email', 'Add to premium leads'],
     timesExecuted: 430,
     editedOn: '2025-12-18T08:20:00Z',
     editedBy: 'Maria Rossi',
@@ -125,6 +133,7 @@ export const automations: Automation[] = [
     name: 'Birthday discount coupon',
     group: null,
     trigger: 'User birthday',
+    actions: ['Send birthday email', 'Issue 20% coupon'],
     timesExecuted: 192,
     editedOn: '2025-07-30T17:10:00Z',
     editedBy: 'Admin',

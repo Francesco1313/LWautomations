@@ -18,7 +18,7 @@ function formatDateTime(iso: string) {
 }
 
 // ── Column layout ─────────────────────────────────────────────────────────────
-const GRID_COLS = '40px 150px 1fr 1fr 110px 110px 56px'
+const GRID_COLS = '40px 1fr 160px 200px 110px 110px 130px 56px'
 const P = '0 16px'
 
 // ── GroupLabel ─────────────────────────────────────────────────────────────────
@@ -47,6 +47,23 @@ function GroupLabel({ group }: { group: string | null }) {
       whiteSpace: 'nowrap',
     }}>
       {group}
+    </span>
+  )
+}
+
+// ── ActionChip ────────────────────────────────────────────────────────────────
+function ActionChip({ label }: { label: string }) {
+  return (
+    /* DEV: use <Chips.SingleChip label={label} variant="action"> */
+    <span style={{
+      display: 'inline-flex', alignItems: 'center',
+      padding: '3px 8px', borderRadius: 4,
+      fontSize: 12, fontWeight: 400,
+      background: 'var(--light-teal)', color: 'var(--teal)',
+      whiteSpace: 'nowrap', maxWidth: 180,
+      overflow: 'hidden', textOverflow: 'ellipsis',
+    }}>
+      {label}
     </span>
   )
 }
@@ -194,29 +211,28 @@ function AutomationRow({ automation }: { automation: Automation }) {
   const [hovered, setHovered] = useState(false)
 
   return (
-    /* DEV: use <DataTable.Row> — fixed height 68px */
+    /* DEV: use <DataTable.Row> — min height 68px, wraps on long titles */
     <div
       onClick={() => navigate(`/canvas/${automation.id}`)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        height: 68, minHeight: 68,
+        minHeight: 68,
         display: 'grid', gridTemplateColumns: GRID_COLS, alignItems: 'center',
         background: hovered ? 'var(--teal-60-light3)' : '#fff',
         cursor: 'pointer',
         transition: 'background 0.1s',
       }}
     >
+      {/* dot-menu */}
       <div
         onClick={(e) => e.stopPropagation()}
         style={{ padding: '0 4px 0 8px', display: 'flex', alignItems: 'center', visibility: hovered ? 'visible' : 'hidden' }}
       >
         <ThreeDotMenu automation={automation} />
       </div>
-      <div style={{ padding: P, display: 'flex', alignItems: 'center', overflow: 'hidden' }}>
-        <GroupLabel group={automation.group} />
-      </div>
-      <div style={{ padding: P, display: 'flex', alignItems: 'center', gap: 7, overflow: 'hidden' }}>
+      {/* Automation title — up to 3 lines */}
+      <div style={{ padding: P, display: 'flex', alignItems: 'center', gap: 7, minWidth: 0 }}>
         {/* DEV: use <StatusBadge variant="error"> when hasErrors */}
         {automation.hasErrors && (
           <div
@@ -233,13 +249,21 @@ function AutomationRow({ automation }: { automation: Automation }) {
         <span style={{
           fontSize: 14, fontWeight: 500,
           color: automation.hasErrors ? 'var(--red)' : 'var(--grey2)',
-          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          display: '-webkit-box',
+          WebkitLineClamp: 3,
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
         }}>
           {automation.name}
         </span>
       </div>
+      {/* When (trigger) */}
       <div style={{ padding: P, display: 'flex', alignItems: 'center', overflow: 'hidden' }}>
         <TriggerChip label={automation.trigger} />
+      </div>
+      {/* Then (actions) */}
+      <div style={{ padding: P, display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'flex-start', paddingTop: 10, paddingBottom: 10 }}>
+        {automation.actions.map(a => <ActionChip key={a} label={a} />)}
       </div>
       {/* Times executed — teal, clickable → view activity */}
       <div
@@ -250,10 +274,15 @@ function AutomationRow({ automation }: { automation: Automation }) {
           {automation.timesExecuted.toLocaleString()}
         </span>
       </div>
+      {/* Edited on */}
       <div style={{ padding: P, display: 'flex', alignItems: 'center' }}>
         <span style={{ fontSize: 13, color: 'var(--grey2)' }}>
           {formatDate(automation.editedOn)}
         </span>
+      </div>
+      {/* Group name */}
+      <div style={{ padding: P, display: 'flex', alignItems: 'center', overflow: 'hidden' }}>
+        <GroupLabel group={automation.group} />
       </div>
       {/* DEV: use <StatusDot status={automation.status}> */}
       <div style={{ padding: P, display: 'flex', alignItems: 'center' }}>
@@ -481,15 +510,17 @@ function AutomationLogsTab() {
                           {row.stepLabel}
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
-                          <span style={{ fontSize: 12, color: 'var(--grey3)' }}>
-                            {stepTypeLabel(row.stepType)}
-                          </span>
-                          {showFailed && (
+                          {showFailed ? (
                             <>
-                              <span style={{ color: 'var(--grey4)', fontSize: 12 }}>·</span>
-                              <span style={{ fontSize: 12, color: 'var(--red)', fontWeight: 500 }}>Failed</span>
+                              <span style={{ fontSize: 12, color: 'var(--red)', fontWeight: 500 }}>
+                                {stepTypeLabel(row.stepType)} · Failed
+                              </span>
                               {row.errorMessage && <HelpIcon message={row.errorMessage} />}
                             </>
+                          ) : (
+                            <span style={{ fontSize: 12, color: 'var(--grey3)' }}>
+                              {stepTypeLabel(row.stepType)}
+                            </span>
                           )}
                         </div>
                       </div>
@@ -553,17 +584,6 @@ function MyAutomationsTab() {
             <strong>{errorCount} automation{errorCount > 1 ? 's' : ''}</strong>{' '}
             {errorCount > 1 ? 'have' : 'has'} failed actions. Review to ensure learners are not missing steps.
           </span>
-          <button
-            onClick={() => setErrorsOnly(true)}
-            style={{
-              marginLeft: 'auto', padding: '3px 10px',
-              border: '1px solid var(--red)', borderRadius: 4,
-              background: 'transparent', color: 'var(--red)',
-              fontSize: 12, fontWeight: 500, cursor: 'pointer',
-            }}
-          >
-            Show only errors
-          </button>
         </div>
       )}
 
@@ -633,11 +653,12 @@ function MyAutomationsTab() {
           borderBottom: '1px solid var(--grey5)',
         }}>
           <div />
-          <div style={{ padding: P, fontSize: 13, fontWeight: 500, color: 'var(--grey3)' }}>Group name</div>
           <div style={{ padding: P, fontSize: 13, fontWeight: 500, color: 'var(--grey3)' }}>Automation title</div>
-          <div style={{ padding: P, fontSize: 13, fontWeight: 500, color: 'var(--grey3)' }}>Triggers</div>
+          <div style={{ padding: P, fontSize: 13, fontWeight: 500, color: 'var(--grey3)' }}>When</div>
+          <div style={{ padding: P, fontSize: 13, fontWeight: 500, color: 'var(--grey3)' }}>Then</div>
           <div style={{ padding: P, fontSize: 13, fontWeight: 500, color: 'var(--grey3)' }}>Times executed</div>
           <div style={{ padding: P, fontSize: 13, fontWeight: 500, color: 'var(--grey3)' }}>Edited on</div>
+          <div style={{ padding: P, fontSize: 13, fontWeight: 500, color: 'var(--grey3)' }}>Group name</div>
           <div style={{ padding: P, fontSize: 13, fontWeight: 500, color: 'var(--grey3)' }}>Status</div>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 10 }}>
