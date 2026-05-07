@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/LWautomations/',
+  base: process.env.VERCEL ? '/' : '/LWautomations/',
   server: {
     port: 5173,
   },
