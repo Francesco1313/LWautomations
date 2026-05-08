@@ -13,7 +13,7 @@ const sections: NavSection[] = [
   {
     kind: 'group', label: 'Users', defaultOpen: true,
     subItems: [
-      { label: 'All users',      path: '#' },
+      { label: 'All users',      path: '/users' },
       { label: 'Collaborators',  path: '#' },
       { label: 'Leads',          path: '#' },
       { label: 'User Groups',    path: '#' },
@@ -42,7 +42,7 @@ export default function Sidebar() {
 
   function isSubActive(label: string) {
     if (label === 'Automations') return isAutomationsActive
-    if (label === 'All users')   return location.pathname.startsWith('/user')
+    if (label === 'All users')   return location.pathname === '/users' || location.pathname.startsWith('/user')
     return false
   }
 
