@@ -135,7 +135,9 @@ export default function TimelineHistoryTab({ runs }: Props) {
   const filtered = useMemo(() => {
     let rows = allRows
     if (outcomeFilter === 'failed') rows = rows.filter(r => r.outcome === 'failed')
-    if (eventFilter !== 'all') rows = rows.filter(r => r.label === eventFilter)
+    if (eventFilter === '__all_triggers__') rows = rows.filter(r => r.rowType === 'trigger')
+    else if (eventFilter === '__all_actions__') rows = rows.filter(r => r.rowType === 'action')
+    else if (eventFilter !== 'all') rows = rows.filter(r => r.label === eventFilter)
     if (search) rows = rows.filter(r =>
       r.userName.toLowerCase().includes(search.toLowerCase()) ||
       r.userEmail.toLowerCase().includes(search.toLowerCase())
@@ -182,11 +184,13 @@ export default function TimelineHistoryTab({ runs }: Props) {
           <option value="all">All events</option>
           {eventOptions.triggers.length > 0 && (
             <optgroup label="Triggers">
+              <option value="__all_triggers__">All triggers</option>
               {eventOptions.triggers.map(t => <option key={t} value={t}>{t}</option>)}
             </optgroup>
           )}
           {eventOptions.actions.length > 0 && (
             <optgroup label="Actions">
+              <option value="__all_actions__">All actions</option>
               {eventOptions.actions.map(a => <option key={a} value={a}>{a}</option>)}
             </optgroup>
           )}
