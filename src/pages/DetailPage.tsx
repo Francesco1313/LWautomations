@@ -4,7 +4,7 @@ import Sidebar from '../components/layout/Sidebar'
 import { automations } from '../data/automations'
 import { runs } from '../data/runs'
 import ActionLogsTab from '../components/detail/ActionLogsTab'
-import EnrollmentHistoryTab from '../components/detail/EnrollmentHistoryTab'
+import TimelineHistoryTab from '../components/detail/TimelineHistoryTab'
 import PerformanceTab from '../components/detail/PerformanceTab'
 
 function formatDate(iso: string) {
@@ -14,9 +14,9 @@ function formatDate(iso: string) {
 }
 
 const TABS = [
-  { key: 'performance',  label: 'Performance' },
-  { key: 'action-logs',  label: 'Action logs' },
-  { key: 'enrollment',   label: 'Enrollment history' },
+  { key: 'performance',       label: 'Performance' },
+  { key: 'action-logs',       label: 'Action logs' },
+  { key: 'timeline-history',  label: 'Timeline history' },
 ] as const
 
 type TabKey = typeof TABS[number]['key']
@@ -163,8 +163,8 @@ export default function DetailPage() {
             <ActionLogsTab runs={automationRuns} />
           )}
 
-          {activeTab === 'enrollment' && (
-            <EnrollmentHistoryTab runs={automationRuns} />
+          {activeTab === 'timeline-history' && (
+            <TimelineHistoryTab runs={automationRuns} />
           )}
 
         </div>

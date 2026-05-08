@@ -16,16 +16,14 @@ interface LogRow {
   userId: string
   userName: string
   userEmail: string
-  rowType: 'trigger' | 'action' | 'branch' | 'completion'
+  rowType: 'trigger' | 'action' | 'branch'
   stepIndex: number
   label: string
   outcome: 'success' | 'failed'
   errorMessage: string | null
   timestamp: string
-  run: Run
 }
 
-// DEV: use <Tooltip> / <IconButton> / <InlineHelpIcon>
 function HelpIcon({ message }: { message: string }) {
   const [open, setOpen] = useState(false)
   return (
@@ -59,107 +57,43 @@ function HelpIcon({ message }: { message: string }) {
 }
 
 function buildRows(runs: Run[]): LogRow[] {
-  const sorted = [...runs].sort(
-    (a, b) => new Date(b.enrolledAt).getTime() - new Date(a.enrolledAt).getTime()
-  )
-
-  return sorted.flatMap(run => {
-    const base = {
-      runId: run.id,
-      userId: run.userId,
-      userName: run.userName,
-      userEmail: run.userEmail,
-      run,
-    }
-
-    const triggerStep = run.steps.find(s => s.type === 'trigger')
-    const actionSteps = run.steps.filter(s => s.type === 'action' || s.type === 'branch')
-    const completionStep = run.steps.find(s => s.type === 'completion')
-
-    const rows: LogRow[] = []
-
-    if (triggerStep) {
+  const rows: LogRow[] = []
+  runs.forEach(run => {
+    const base = { runId: run.id, userId: run.userId, userName: run.userName, userEmail: run.userEmail }
+    run.steps.forEach((step, idx) => {
+      if (step.type === 'completion') return
       rows.push({
         ...base,
-        rowType: 'trigger',
-        stepIndex: 0,
-        label: triggerStep.label,
-        outcome: triggerStep.outcome,
-        errorMessage: triggerStep.errorMessage,
-        timestamp: triggerStep.timestamp,
-      })
-    }
-
-    actionSteps.forEach((step, idx) => {
-      rows.push({
-        ...base,
-        rowType: step.type as 'action' | 'branch',
-        stepIndex: idx + 1,
+        rowType: step.type as 'trigger' | 'action' | 'branch',
+        stepIndex: idx,
         label: step.label,
         outcome: step.outcome,
         errorMessage: step.errorMessage,
         timestamp: step.timestamp,
       })
     })
-
-    if (completionStep) {
-      rows.push({
-        ...base,
-        rowType: 'completion',
-        stepIndex: actionSteps.length + 1,
-        label: completionStep.label,
-        outcome: completionStep.outcome,
-        errorMessage: completionStep.errorMessage,
-        timestamp: completionStep.timestamp,
-      })
-    }
-
-    return rows
   })
+  return rows.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
 }
 
 function rowTypeLabel(rowType: LogRow['rowType']): string {
   if (rowType === 'trigger') return 'Trigger'
   if (rowType === 'action') return 'Action'
-  if (rowType === 'branch') return 'Automation control'
-  return ''
+  return 'Automation control'
 }
 
 function rowVisual(row: LogRow) {
-  if (row.rowType === 'completion') return { borderLeft: '4px solid transparent', background: 'white' }
-  if (row.outcome === 'failed') return { borderLeft: '4px solid var(--red)', background: 'white' }
+  if (row.outcome === 'failed' && row.rowType !== 'trigger') return { borderLeft: '4px solid var(--red)', background: 'white' }
   if (row.rowType === 'trigger') return { borderLeft: '4px solid var(--grey2)', background: 'var(--grey7)' }
   return { borderLeft: '4px solid var(--grey4)', background: 'white' }
 }
 
-// DEV: use <LogRow>, <TextMeta>, <StatusInline> or equivalent admin UI components
 function EventCell({ row }: { row: LogRow }) {
-  if (row.rowType === 'completion') {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span aria-hidden="true" style={{ display: 'inline-flex' }}>
-          <svg width="18" height="18" viewBox="0 0 18 18" style={{ display: 'block' }}>
-            <circle cx="9" cy="9" r="8" fill="var(--completed)" />
-            <path d="M5 9.2 7.6 12 13 6" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </span>
-        <span style={{ fontSize: 13, color: 'var(--teal)', fontWeight: 500 }}>
-          Completed automation
-        </span>
-      </div>
-    )
-  }
-
   const isFailed = row.outcome === 'failed'
   const showFailed = isFailed && (row.rowType === 'action' || row.rowType === 'branch')
-
   return (
     <div>
-      {/* Primary: action/trigger name */}
-      <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--grey1)' }}>
-        {row.label}
-      </div>
-      {/* Secondary: type label + failed feedback */}
+      <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--grey1)' }}>{row.label}</div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
         {showFailed ? (
           <>
@@ -169,9 +103,7 @@ function EventCell({ row }: { row: LogRow }) {
             {row.errorMessage && <HelpIcon message={row.errorMessage} />}
           </>
         ) : (
-          <span style={{ fontSize: 12, color: 'var(--grey3)' }}>
-            {rowTypeLabel(row.rowType)}
-          </span>
+          <span style={{ fontSize: 12, color: 'var(--grey3)' }}>{rowTypeLabel(row.rowType)}</span>
         )}
       </div>
     </div>
@@ -180,11 +112,11 @@ function EventCell({ row }: { row: LogRow }) {
 
 interface Props { runs: Run[] }
 
-export default function ActionLogsTab({ runs }: Props) {
+export default function TimelineHistoryTab({ runs }: Props) {
   const navigate = useNavigate()
+  const [search, setSearch] = useState('')
   const [outcomeFilter, setOutcomeFilter] = useState<OutcomeFilter>('all')
   const [eventFilter, setEventFilter] = useState<string>('all')
-  const [search, setSearch] = useState('')
 
   const allRows = useMemo(() => buildRows(runs), [runs])
 
@@ -210,16 +142,6 @@ export default function ActionLogsTab({ runs }: Props) {
     )
     return rows
   }, [allRows, outcomeFilter, eventFilter, search])
-
-  const runGroups = useMemo(() => {
-    const groups: Record<string, LogRow[]> = {}
-    const order: string[] = []
-    filtered.forEach(row => {
-      if (!groups[row.runId]) { groups[row.runId] = []; order.push(row.runId) }
-      groups[row.runId].push(row)
-    })
-    return order.map(id => groups[id])
-  }, [filtered])
 
   return (
     <>
@@ -248,7 +170,6 @@ export default function ActionLogsTab({ runs }: Props) {
           <option value="all">All outcomes</option>
           <option value="failed">Failed only</option>
         </select>
-        {/* DEV: use <FilterDropdown> */}
         <select
           value={eventFilter}
           onChange={e => setEventFilter(e.target.value)}
@@ -293,7 +214,7 @@ export default function ActionLogsTab({ runs }: Props) {
       </div>
 
       {/* Table */}
-      {/* DEV: use <DataTable> with grouped rows */}
+      {/* DEV: use <DataTable> */}
       <div style={{
         background: 'white', border: '1px solid var(--grey5)', borderRadius: 6,
         overflow: 'hidden',
@@ -317,53 +238,42 @@ export default function ActionLogsTab({ runs }: Props) {
             </tr>
           </thead>
           <tbody>
-            {runGroups.length === 0 ? (
+            {filtered.length === 0 ? (
               <tr>
                 <td colSpan={3} style={{ padding: 48, textAlign: 'center', color: 'var(--grey3)', fontSize: 13 }}>
                   No log entries match your filters
                 </td>
               </tr>
             ) : (
-              runGroups.map((group) => (
-                group.map((row, ri) => {
-                  const rowKey = `${row.runId}-${row.stepIndex}`
-                  const isGroupStart = ri === 0
-                  const isGroupEnd = ri === group.length - 1
-                  const visual = rowVisual(row)
-
-                  return (
-                    <tr
-                      key={rowKey}
-                      style={{
-                        borderBottom: isGroupEnd ? '2px solid var(--grey5)' : '1px solid var(--grey6)',
-                        borderLeft: visual.borderLeft,
-                        background: visual.background,
-                      }}
-                    >
-                      <td style={{ padding: '10px 16px', verticalAlign: 'top' }}>
-                        {isGroupStart && (
-                          <div style={{ padding: '6px 8px', borderRadius: 4 }}>
-                            {/* DEV: link to user profile */}
-                            <button
-                              onClick={() => navigate(`/user/${row.userId}`)}
-                              style={{ fontSize: 13, color: 'var(--teal)', fontWeight: 500, cursor: 'pointer', display: 'block' }}
-                            >
-                              {row.userName}
-                            </button>
-                            <div style={{ fontSize: 12, color: 'var(--grey3)' }}>{row.userEmail}</div>
-                          </div>
-                        )}
-                      </td>
-                      <td style={{ padding: '10px 16px', verticalAlign: 'middle', minWidth: 0 }}>
-                        <EventCell row={row} />
-                      </td>
-                      <td style={{ padding: '10px 16px', fontSize: 12, color: 'var(--grey3)', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
-                        {formatDateTime(row.timestamp)}
-                      </td>
-                    </tr>
-                  )
-                })
-              ))
+              filtered.map((row, i) => {
+                const visual = rowVisual(row)
+                return (
+                  <tr
+                    key={`${row.runId}-${row.stepIndex}-${i}`}
+                    style={{
+                      borderBottom: '1px solid var(--grey6)',
+                      borderLeft: visual.borderLeft,
+                      background: visual.background,
+                    }}
+                  >
+                    <td style={{ padding: '10px 16px', verticalAlign: 'top' }}>
+                      <button
+                        onClick={() => navigate(`/user/${row.userId}`)}
+                        style={{ fontSize: 13, color: 'var(--teal)', fontWeight: 500, cursor: 'pointer', display: 'block', background: 'none', border: 'none', padding: 0, textAlign: 'left' }}
+                      >
+                        {row.userName}
+                      </button>
+                      <div style={{ fontSize: 12, color: 'var(--grey3)' }}>{row.userEmail}</div>
+                    </td>
+                    <td style={{ padding: '10px 16px', verticalAlign: 'middle', minWidth: 0 }}>
+                      <EventCell row={row} />
+                    </td>
+                    <td style={{ padding: '10px 16px', fontSize: 12, color: 'var(--grey3)', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                      {formatDateTime(row.timestamp)}
+                    </td>
+                  </tr>
+                )
+              })
             )}
           </tbody>
         </table>
