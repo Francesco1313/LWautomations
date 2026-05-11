@@ -16,7 +16,7 @@ function formatDate(iso: string) {
 const TABS = [
   { key: 'performance',       label: 'Performance' },
   { key: 'action-logs',       label: 'Action logs' },
-  { key: 'timeline-history',  label: 'Timeline history' },
+  { key: 'timeline-history',  label: 'Enrollment history' },
 ] as const
 
 type TabKey = typeof TABS[number]['key']

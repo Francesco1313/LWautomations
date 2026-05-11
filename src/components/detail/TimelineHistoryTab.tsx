@@ -120,24 +120,16 @@ export default function TimelineHistoryTab({ runs }: Props) {
 
   const allRows = useMemo(() => buildRows(runs), [runs])
 
-  const eventOptions = useMemo(() => {
+  const triggerOptions = useMemo(() => {
     const triggers = new Set<string>()
-    const actions = new Set<string>()
-    const controls = new Set<string>()
-    allRows.forEach(r => {
-      if (r.rowType === 'trigger') triggers.add(r.label)
-      else if (r.rowType === 'action') actions.add(r.label)
-      else if (r.rowType === 'branch') controls.add(r.label)
-    })
-    return { triggers: [...triggers], actions: [...actions], controls: [...controls] }
+    allRows.forEach(r => { if (r.rowType === 'trigger') triggers.add(r.label) })
+    return [...triggers]
   }, [allRows])
 
   const filtered = useMemo(() => {
     let rows = allRows
     if (outcomeFilter === 'failed') rows = rows.filter(r => r.outcome === 'failed')
-    if (eventFilter === '__all_triggers__') rows = rows.filter(r => r.rowType === 'trigger')
-    else if (eventFilter === '__all_actions__') rows = rows.filter(r => r.rowType === 'action')
-    else if (eventFilter !== 'all') rows = rows.filter(r => r.label === eventFilter)
+    if (eventFilter !== 'all') rows = rows.filter(r => r.rowType === 'trigger' && r.label === eventFilter)
     if (search) rows = rows.filter(r =>
       r.userName.toLowerCase().includes(search.toLowerCase()) ||
       r.userEmail.toLowerCase().includes(search.toLowerCase())
@@ -181,24 +173,8 @@ export default function TimelineHistoryTab({ runs }: Props) {
             fontSize: 13, color: 'var(--grey2)', background: 'white', cursor: 'pointer',
           }}
         >
-          <option value="all">All events</option>
-          {eventOptions.triggers.length > 0 && (
-            <optgroup label="Triggers">
-              <option value="__all_triggers__">All triggers</option>
-              {eventOptions.triggers.map(t => <option key={t} value={t}>{t}</option>)}
-            </optgroup>
-          )}
-          {eventOptions.actions.length > 0 && (
-            <optgroup label="Actions">
-              <option value="__all_actions__">All actions</option>
-              {eventOptions.actions.map(a => <option key={a} value={a}>{a}</option>)}
-            </optgroup>
-          )}
-          {eventOptions.controls.length > 0 && (
-            <optgroup label="Controls">
-              {eventOptions.controls.map(c => <option key={c} value={c}>{c}</option>)}
-            </optgroup>
-          )}
+          <option value="all">All enrollments</option>
+          {triggerOptions.map(t => <option key={t} value={t}>{t}</option>)}
         </select>
         <span style={{ fontSize: 12, color: 'var(--grey3)', marginLeft: 'auto' }}>
           {filtered.length} log entries
