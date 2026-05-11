@@ -4,7 +4,8 @@ import { runs } from '../../data/runs'
 
 // ── Node definitions ─────────────────────────────────────────────────────────
 const NODES: CanvasNodeData[] = [
-  { id: 'trigger-1', type: 'trigger', title: 'User tagged as', subtitle: 'Start an automation when', chips: ['Newsletter', 'Product Updates', 'Weekly Digest', '+2 more'], stepLabel: 'User signs up' },
+  { id: 'trigger-1', type: 'trigger', title: 'User signs up', subtitle: 'Start an automation when', chips: ['Registration form', 'Social login', '+1 more'], stepLabel: 'User signs up' },
+  { id: 'trigger-2', type: 'trigger', title: 'Admin manually enrolls user', subtitle: 'Start an automation when', chips: ['Admin action'], stepLabel: 'Admin manually enrolls user' },
   { id: 'action-1',  type: 'action',  title: 'Send welcome email', chips: ['Welcome email v2'], stepLabel: 'Send welcome email' },
   { id: 'delay-1',   type: 'delay',   title: 'Wait until 01:15 pm of 2025-10-21', stepLabel: 'Wait 3 days', waitingCount: 3 },
   { id: 'action-2',  type: 'action',  title: "Automatically tag based on user's email domain", chips: ['user custom field', '1 Hour Before', '+2 more'], stepLabel: 'Add to newsletter tag' },
@@ -514,31 +515,44 @@ export default function Canvas({ automationId }: { automationId?: string }) {
         padding: '56px 80px 80px',
       }}>
 
+        {/* Trigger 1 */}
         <NodeWithBadges hasError={errorNodeId === NODES[0].id} isErrorOpen={errorBadgeOpenId === NODES[0].id} errorEntries={errorNodeId === NODES[0].id ? errorEntries : []} onErrorClick={() => toggleErrorBadge(NODES[0].id)}>
           <TriggerNode node={NODES[0]} selected={selectedId === NODES[0].id} onClick={() => handleSelect(NODES[0].id)} />
         </NodeWithBadges>
-        <PlusButton />
 
+        {/* OR divider */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '4px 0', width: 320 }}>
+          <div style={{ flex: 1, height: 1, background: 'var(--grey5)' }} />
+          <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--grey3)', letterSpacing: '0.08em', padding: '2px 8px', border: '1px solid var(--grey5)', borderRadius: 10, background: '#fff' }}>OR</span>
+          <div style={{ flex: 1, height: 1, background: 'var(--grey5)' }} />
+        </div>
+
+        {/* Trigger 2 */}
         <NodeWithBadges hasError={errorNodeId === NODES[1].id} isErrorOpen={errorBadgeOpenId === NODES[1].id} errorEntries={errorNodeId === NODES[1].id ? errorEntries : []} onErrorClick={() => toggleErrorBadge(NODES[1].id)}>
-          <ActionNode node={NODES[1]} selected={selectedId === NODES[1].id} onClick={() => handleSelect(NODES[1].id)} />
+          <TriggerNode node={NODES[1]} selected={selectedId === NODES[1].id} onClick={() => handleSelect(NODES[1].id)} />
         </NodeWithBadges>
         <PlusButton />
 
-        <NodeWithBadges waitingCount={NODES[2].waitingCount} hasError={errorNodeId === NODES[2].id} isErrorOpen={errorBadgeOpenId === NODES[2].id} errorEntries={errorNodeId === NODES[2].id ? errorEntries : []} onErrorClick={() => toggleErrorBadge(NODES[2].id)}>
-          <DelayNode node={NODES[2]} selected={selectedId === NODES[2].id} onClick={() => handleSelect(NODES[2].id)} />
+        <NodeWithBadges hasError={errorNodeId === NODES[2].id} isErrorOpen={errorBadgeOpenId === NODES[2].id} errorEntries={errorNodeId === NODES[2].id ? errorEntries : []} onErrorClick={() => toggleErrorBadge(NODES[2].id)}>
+          <ActionNode node={NODES[2]} selected={selectedId === NODES[2].id} onClick={() => handleSelect(NODES[2].id)} />
         </NodeWithBadges>
         <PlusButton />
 
-        <NodeWithBadges hasError={errorNodeId === NODES[3].id} isErrorOpen={errorBadgeOpenId === NODES[3].id} errorEntries={errorNodeId === NODES[3].id ? errorEntries : []} onErrorClick={() => toggleErrorBadge(NODES[3].id)}>
-          <ActionNode node={NODES[3]} selected={selectedId === NODES[3].id} onClick={() => handleSelect(NODES[3].id)} />
+        <NodeWithBadges waitingCount={NODES[3].waitingCount} hasError={errorNodeId === NODES[3].id} isErrorOpen={errorBadgeOpenId === NODES[3].id} errorEntries={errorNodeId === NODES[3].id ? errorEntries : []} onErrorClick={() => toggleErrorBadge(NODES[3].id)}>
+          <DelayNode node={NODES[3]} selected={selectedId === NODES[3].id} onClick={() => handleSelect(NODES[3].id)} />
         </NodeWithBadges>
         <PlusButton />
 
         <NodeWithBadges hasError={errorNodeId === NODES[4].id} isErrorOpen={errorBadgeOpenId === NODES[4].id} errorEntries={errorNodeId === NODES[4].id ? errorEntries : []} onErrorClick={() => toggleErrorBadge(NODES[4].id)}>
-          <BranchNode node={NODES[4]} selected={selectedId === NODES[4].id} onClick={() => handleSelect(NODES[4].id)} />
+          <ActionNode node={NODES[4]} selected={selectedId === NODES[4].id} onClick={() => handleSelect(NODES[4].id)} />
+        </NodeWithBadges>
+        <PlusButton />
+
+        <NodeWithBadges hasError={errorNodeId === NODES[5].id} isErrorOpen={errorBadgeOpenId === NODES[5].id} errorEntries={errorNodeId === NODES[5].id ? errorEntries : []} onErrorClick={() => toggleErrorBadge(NODES[5].id)}>
+          <BranchNode node={NODES[5]} selected={selectedId === NODES[5].id} onClick={() => handleSelect(NODES[5].id)} />
         </NodeWithBadges>
         <BranchSplitLayout
-          yesNode={NODES[5]} noNode={NODES[6]}
+          yesNode={NODES[6]} noNode={NODES[7]}
           selectedId={selectedId} onSelect={handleSelect}
         />
 

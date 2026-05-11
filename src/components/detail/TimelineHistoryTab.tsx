@@ -61,10 +61,10 @@ function buildRows(runs: Run[]): LogRow[] {
   runs.forEach(run => {
     const base = { runId: run.id, userId: run.userId, userName: run.userName, userEmail: run.userEmail }
     run.steps.forEach((step, idx) => {
-      if (step.type === 'completion') return
+      if (step.type !== 'trigger') return
       rows.push({
         ...base,
-        rowType: step.type as 'trigger' | 'action' | 'branch',
+        rowType: 'trigger' as const,
         stepIndex: idx,
         label: step.label,
         outcome: step.outcome,
