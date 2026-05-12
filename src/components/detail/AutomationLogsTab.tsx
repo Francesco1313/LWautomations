@@ -1,5 +1,4 @@
 import { useState, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { Run } from '../../data/runs'
 
 function formatDateTime(iso: string) {
@@ -80,7 +79,6 @@ function stepTypeLabel(type: 'action' | 'branch'): string {
 interface Props { runs: Run[] }
 
 export default function AutomationLogsTab({ runs }: Props) {
-  const navigate = useNavigate()
   const [expandedRunIds, setExpandedRunIds] = useState<Set<string>>(new Set())
   const [search, setSearch] = useState('')
   const [outcomeFilter, setOutcomeFilter] = useState<OutcomeFilter>('all')
@@ -164,7 +162,7 @@ export default function AutomationLogsTab({ runs }: Props) {
             fontSize: 13, color: 'var(--grey2)', background: 'white', cursor: 'pointer',
           }}
         >
-          <option value="all">All events</option>
+          <option value="all">All triggers</option>
           {triggerOptions.map(t => <option key={t} value={t}>{t}</option>)}
         </select>
         <span style={{ fontSize: 12, color: 'var(--grey3)', marginLeft: 'auto' }}>
@@ -250,9 +248,9 @@ export default function AutomationLogsTab({ runs }: Props) {
                             ▶
                           </button>
                           <div>
-                            {/* DEV: link to user profile */}
+                            {/* DEV: link to user profile → Activity tab, new tab */}
                             <button
-                              onClick={() => navigate(`/user/${run.userId}`)}
+                              onClick={e => { e.stopPropagation(); window.open(`/user/${run.userId}?tab=activity`, '_blank') }}
                               style={{
                                 fontSize: 13, color: 'var(--teal)', fontWeight: 500,
                                 cursor: 'pointer', display: 'block',
