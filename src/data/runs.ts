@@ -332,8 +332,8 @@ export const runs: Run[] = [
     status: 'failed',
     steps: [
       { type: 'trigger', label: 'User signs up', outcome: 'success', errorMessage: null, timestamp: '2026-03-28T11:00:00Z' },
-      { type: 'action', label: 'Send welcome email', outcome: 'failed', errorMessage: 'SMTP authentication failed: credentials rejected by the mail server.', timestamp: '2026-03-28T11:01:00Z' },
-      { type: 'action', label: 'Add to newsletter tag', outcome: 'failed', errorMessage: 'Previous step failed; action skipped.', timestamp: '2026-03-28T11:01:05Z' },
+      { type: 'action', label: 'Send welcome email', outcome: 'failed', errorMessage: 'SMTP authentication failed: credentials rejected by the mail server.', timestamp: '2026-04-02T09:00:00Z' },
+      { type: 'action', label: 'Add to newsletter tag', outcome: 'success', errorMessage: null, timestamp: '2026-04-03T11:20:00Z' },
     ],
   },
   {
@@ -348,10 +348,10 @@ export const runs: Run[] = [
     status: 'completed',
     steps: [
       { type: 'trigger', label: 'User signs up', outcome: 'success', errorMessage: null, timestamp: '2026-04-01T08:45:00Z' },
-      { type: 'action', label: 'Send welcome email', outcome: 'success', errorMessage: null, timestamp: '2026-04-01T08:46:00Z' },
-      { type: 'action', label: 'Add to newsletter tag', outcome: 'success', errorMessage: null, timestamp: '2026-04-01T08:46:05Z' },
-      { type: 'branch', label: 'Branch', outcome: 'success', branchPath: 'yes', errorMessage: null, timestamp: '2026-04-01T08:46:08Z' },
-      { type: 'completion', label: 'Automation completed', outcome: 'success', errorMessage: null, timestamp: '2026-04-01T08:46:10Z' },
+      { type: 'action', label: 'Send welcome email', outcome: 'success', errorMessage: null, timestamp: '2026-04-03T10:00:00Z' },
+      { type: 'action', label: 'Add to newsletter tag', outcome: 'success', errorMessage: null, timestamp: '2026-04-05T14:00:00Z' },
+      { type: 'branch', label: 'Branch', outcome: 'success', branchPath: 'yes', errorMessage: null, timestamp: '2026-04-05T14:00:30Z' },
+      { type: 'completion', label: 'Automation completed', outcome: 'success', errorMessage: null, timestamp: '2026-04-05T14:00:35Z' },
     ],
   },
   {
@@ -448,8 +448,8 @@ export const runs: Run[] = [
     status: 'failed',
     steps: [
       { type: 'trigger', label: 'User signs up', outcome: 'success', errorMessage: null, timestamp: '2026-04-08T10:30:00Z' },
-      { type: 'action', label: 'Send welcome email', outcome: 'failed', errorMessage: 'Message size exceeds the maximum allowed by the recipient mail server.', timestamp: '2026-04-08T10:31:00Z' },
-      { type: 'action', label: 'Add to newsletter tag', outcome: 'failed', errorMessage: 'Previous step failed; action skipped.', timestamp: '2026-04-08T10:31:05Z' },
+      { type: 'action', label: 'Send welcome email', outcome: 'failed', errorMessage: 'Message size exceeds the maximum allowed by the recipient mail server.', timestamp: '2026-04-10T09:15:00Z' },
+      { type: 'action', label: 'Add to newsletter tag', outcome: 'success', errorMessage: null, timestamp: '2026-04-12T14:30:00Z' },
     ],
   },
 ]

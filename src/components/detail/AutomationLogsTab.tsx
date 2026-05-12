@@ -221,11 +221,6 @@ export default function AutomationLogsTab({ runs }: Props) {
                 const triggerStep = run.steps.find(s => s.type === 'trigger')
                 const actionSteps = run.steps.filter(s => s.type === 'action' || s.type === 'branch')
                 const isExpanded = expandedRunIds.has(run.id)
-                const hasFailedAction = actionSteps.some(s => s.outcome === 'failed')
-                const triggerBorderLeft = hasFailedAction
-                  ? '4px solid var(--red)'
-                  : '4px solid var(--grey2)'
-
                 return (
                   <>
                     {/* Trigger row */}
@@ -233,7 +228,6 @@ export default function AutomationLogsTab({ runs }: Props) {
                       key={run.id}
                       style={{
                         borderBottom: isExpanded ? '1px solid var(--grey6)' : '2px solid var(--grey5)',
-                        borderLeft: triggerBorderLeft,
                         background: 'white',
                       }}
                     >
@@ -297,7 +291,6 @@ export default function AutomationLogsTab({ runs }: Props) {
                           key={`${run.id}-step-${idx}`}
                           style={{
                             borderBottom: isLast ? '2px solid var(--grey5)' : '1px solid var(--grey6)',
-                            borderLeft: isFailed ? '4px solid var(--red)' : '4px solid var(--grey5)',
                             background: 'var(--grey7)',
                           }}
                         >
