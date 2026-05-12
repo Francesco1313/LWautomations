@@ -3,8 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import Sidebar from '../components/layout/Sidebar'
 import { automations } from '../data/automations'
 import { runs } from '../data/runs'
-import ActionLogsTab from '../components/detail/ActionLogsTab'
-import EnrollmentHistoryTab from '../components/detail/EnrollmentHistoryTab'
+import AutomationLogsTab from '../components/detail/AutomationLogsTab'
 import PerformanceTab from '../components/detail/PerformanceTab'
 
 function formatDate(iso: string) {
@@ -14,9 +13,8 @@ function formatDate(iso: string) {
 }
 
 const TABS = [
-  { key: 'performance',  label: 'Performance' },
-  { key: 'action-logs',  label: 'Action logs' },
-  { key: 'enrollment',   label: 'Enrollment history' },
+  { key: 'performance',     label: 'Performance' },
+  { key: 'automation-logs', label: 'Automation Logs' },
 ] as const
 
 type TabKey = typeof TABS[number]['key']
@@ -25,7 +23,7 @@ export default function DetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const automation = automations.find(a => a.id === id)
-  const [activeTab, setActiveTab] = useState<TabKey>('action-logs')
+  const [activeTab, setActiveTab] = useState<TabKey>('automation-logs')
   const automationRuns = runs.filter(r => r.automationId === id)
 
   if (!automation) {
@@ -159,12 +157,8 @@ export default function DetailPage() {
             <PerformanceTab runs={automationRuns} />
           )}
 
-          {activeTab === 'action-logs' && (
-            <ActionLogsTab runs={automationRuns} />
-          )}
-
-          {activeTab === 'enrollment' && (
-            <EnrollmentHistoryTab runs={automationRuns} />
+          {activeTab === 'automation-logs' && (
+            <AutomationLogsTab runs={automationRuns} />
           )}
 
         </div>
