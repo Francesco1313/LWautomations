@@ -141,18 +141,24 @@ export default function AutomationLogsTab({ runs }: Props) {
             borderRadius: 4, fontSize: 13, outline: 'none',
           }}
         />
-        <select
-          value={outcomeFilter}
-          onChange={e => setOutcomeFilter(e.target.value as OutcomeFilter)}
-          style={{
-            height: 34, padding: '0 12px',
-            border: '1px solid var(--grey5)', borderRadius: 4,
-            fontSize: 13, color: 'var(--grey2)', background: 'white', cursor: 'pointer',
-          }}
-        >
-          <option value="all">All outcomes</option>
-          <option value="failed">Failed only</option>
-        </select>
+        {/* DEV: use <FilterToggle label="Errors only"> */}
+        <label style={{
+          display: 'flex', alignItems: 'center', gap: 6,
+          height: 34, padding: '0 10px',
+          border: `1px solid ${outcomeFilter === 'failed' ? 'var(--red)' : 'var(--grey5)'}`,
+          borderRadius: 4,
+          background: outcomeFilter === 'failed' ? 'var(--light-red)' : 'white',
+          fontSize: 13, color: outcomeFilter === 'failed' ? 'var(--red)' : 'var(--grey2)',
+          cursor: 'pointer', userSelect: 'none',
+        }}>
+          <input
+            type="checkbox"
+            checked={outcomeFilter === 'failed'}
+            onChange={e => setOutcomeFilter(e.target.checked ? 'failed' : 'all')}
+            style={{ accentColor: 'var(--red)', width: 13, height: 13 }}
+          />
+          Errors only
+        </label>
         <select
           value={eventFilter}
           onChange={e => setEventFilter(e.target.value)}
