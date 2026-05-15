@@ -232,25 +232,7 @@ export default function AutomationLogsTab({ runs, statusFilter, onStatusFilterCh
           onClick={toggleExpandAll}
           style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 10px', border: '1px solid var(--grey5)', borderRadius: 4, background: 'white', fontSize: 13, color: 'var(--grey2)', cursor: 'pointer', userSelect: 'none' }}
         >
-          {allExpanded ? (
-            <>
-              {/* fa-angles-up-down inverted: chevrons pointing inward = collapse */}
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="2,4 7,7 12,4" />
-                <polyline points="2,10 7,7 12,10" />
-              </svg>
-              Collapse all rows
-            </>
-          ) : (
-            <>
-              {/* fa-angles-up-down: chevrons pointing outward = expand */}
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="2,5 7,2 12,5" />
-                <polyline points="2,9 7,12 12,9" />
-              </svg>
-              Expand all rows
-            </>
-          )}
+          {allExpanded ? 'Collapse all rows' : 'Expand all rows'}
         </button>
         {/* Status filter */}
         <select
