@@ -44,11 +44,11 @@ export function statusLabel(status: RunStatus): string {
 // Signup configs vary per user — picked deterministically by seed
 const SIGNUP_CONFIGS: string[][] = [
   ['LearnWorlds', 'Google', 'Apple'],
-  ['LearnWorlds', 'Google', 'Apple'],
-  ['Google', 'Apple', 'LearnWorlds'],
-  ['Any', 'LearnWorlds', 'Google'],
+  ['LearnWorlds'],
+  ['Google', 'Apple'],
+  ['Any'],
   ['LearnWorlds', 'Apple', 'Google'],
-  ['Google', 'LearnWorlds', 'Apple'],
+  ['Google'],
 ]
 
 const STEP_CONFIG: Record<string, string[]> = {
