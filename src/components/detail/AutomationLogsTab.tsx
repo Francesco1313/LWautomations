@@ -234,17 +234,19 @@ export default function AutomationLogsTab({ runs, statusFilter, onStatusFilterCh
         >
           {allExpanded ? (
             <>
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                <path d="M2 5L5 2M5 2H2M5 2V5" /><path d="M9 5L12 2M12 2H9M12 2V5" />
-                <path d="M2 9L5 12M5 12H2M5 12V9" /><path d="M9 9L12 12M12 12H9M12 12V9" />
+              {/* fa-angles-up-down inverted: chevrons pointing inward = collapse */}
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="2,4 7,7 12,4" />
+                <polyline points="2,10 7,7 12,10" />
               </svg>
               Collapse all rows
             </>
           ) : (
             <>
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                <path d="M5 2L2 5M2 5H5M2 5V2" /><path d="M12 2L9 5M9 5H12M9 5V2" />
-                <path d="M5 12L2 9M2 9H5M2 9V12" /><path d="M12 12L9 9M9 9H12M9 9V12" />
+              {/* fa-angles-up-down: chevrons pointing outward = expand */}
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="2,5 7,2 12,5" />
+                <polyline points="2,9 7,12 12,9" />
               </svg>
               Expand all rows
             </>
