@@ -41,9 +41,19 @@ export function statusLabel(status: RunStatus): string {
 
 // ── Config chip system ────────────────────────────────────────────────────────
 
+// Signup configs vary per user — picked deterministically by seed
+const SIGNUP_CONFIGS: string[][] = [
+  ['LearnWorlds', 'Google', 'Apple'],
+  ['LearnWorlds'],
+  ['Google', 'Apple'],
+  ['Any'],
+  ['LearnWorlds', 'Apple'],
+  ['Google'],
+]
+
 const STEP_CONFIG: Record<string, string[]> = {
-  // Triggers
-  'User signs up':              ['LearnWorlds', 'Google', 'Apple'],
+  // Triggers — 'User signs up' handled separately with seed
+  'User signs up':              [],  // overridden by seed
   'Course completed':           ['Web Dev Bootcamp', 'UX Fundamentals'],
   'User inactive for 30 days':  [],
   'User finishes free course':  ['Free JavaScript 101'],
@@ -55,7 +65,7 @@ const STEP_CONFIG: Record<string, string[]> = {
   'Send welcome email':         ['Welcome v2 template'],
   'Add to newsletter tag':      ['newsletter', 'onboarding'],
   'Wait 3 days':                ['3 days'],
-  'Branch':                     ['Has tag: active', 'AND', 'Enrolled in course'],
+  'Branch':                     ['Has tag: active', 'Enrolled in course'],
   'Award completion badge':     ['Course Completion'],
   'Send congratulations email': ['Congrats v1 template'],
   'Add premium tag':            ['premium'],
@@ -78,16 +88,24 @@ function truncate(text: string, max: number): string {
   return text.length > max ? text.slice(0, max - 1) + '…' : text
 }
 
-// DEV: use <Chips.SingleChip>
-function ConfigChips({ label }: { label: string }) {
-  const configs = STEP_CONFIG[label]
+function seedIndex(seed: string, len: number): number {
+  let h = 0
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) & 0xffffffff
+  return Math.abs(h) % len
+}
 
-  if (configs === undefined || configs.length === 0) {
+// DEV: use <Chips.SingleChip>
+function ConfigChips({ label, seed = '' }: { label: string; seed?: string }) {
+  const base = label === 'User signs up'
+    ? SIGNUP_CONFIGS[seedIndex(seed, SIGNUP_CONFIGS.length)]
+    : STEP_CONFIG[label]
+
+  if (!base || base.length === 0) {
     return <span style={{ fontSize: 12, color: 'var(--grey4)', fontStyle: 'italic' }}>no configuration needed</span>
   }
 
-  const visible = configs.slice(0, 2)
-  const overflow = configs.length - 2
+  const visible = base.slice(0, 2)
+  const overflow = base.length - 2
   const maxChars = visible.length === 1 ? 28 : 20
 
   return (
@@ -96,7 +114,7 @@ function ConfigChips({ label }: { label: string }) {
         <span key={i} style={{
           display: 'inline-block',
           padding: '2px 7px', borderRadius: 4,
-          fontSize: 12, background: 'var(--grey7)', color: 'var(--grey2)',
+          fontSize: 12, background: '#E0E0E0', color: 'var(--grey2)',
           whiteSpace: 'nowrap', maxWidth: `${maxChars}ch`,
           overflow: 'hidden', textOverflow: 'ellipsis',
         }}>
@@ -266,7 +284,7 @@ export default function AutomationLogsTab({ runs, statusFilter, onStatusFilterCh
                       </td>
                       <td style={{ padding: '10px 16px', verticalAlign: 'middle' }}>
                         <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--grey1)' }}>{triggerStep?.label ?? run.triggerEvent}</div>
-                        <ConfigChips label={triggerStep?.label ?? run.triggerEvent} />
+                        <ConfigChips label={triggerStep?.label ?? run.triggerEvent} seed={run.userId} />
                       </td>
                       <td style={{ padding: '10px 16px', verticalAlign: 'middle' }}>
                         <span style={{ fontSize: 13, color: 'var(--grey2)' }}>{statusLabel(run.status)}</span>
