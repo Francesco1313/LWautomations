@@ -39,24 +39,74 @@ export function statusLabel(status: RunStatus): string {
   return map[status]
 }
 
-function statusStyle(status: RunStatus): React.CSSProperties {
-  const styles: Record<RunStatus, React.CSSProperties> = {
-    in_progress:   { background: '#FFF3E0', color: '#E65100' },
-    executing:     { background: 'var(--light-teal)', color: 'var(--teal)' },
-    completed:     { background: 'var(--light-green)', color: 'var(--completed)' },
-    exited:        { background: 'var(--grey6)', color: 'var(--grey2)' },
-    failed:        { background: 'var(--light-red)', color: 'var(--red)' },
-    failed_silent: { background: '#F5F5F5', color: '#9E9E9E' },
-  }
-  return styles[status]
+// ── Config chip system ────────────────────────────────────────────────────────
+
+const STEP_CONFIG: Record<string, string[]> = {
+  // Triggers
+  'User signs up':              ['LearnWorlds', 'Google', 'Apple'],
+  'Course completed':           ['Web Dev Bootcamp', 'UX Fundamentals'],
+  'User inactive for 30 days':  [],
+  'User finishes free course':  ['Free JavaScript 101'],
+  'Admin manually enrolls user': [],
+  'Instructor account created': [],
+  'User birthday':              [],
+  'Scheduled monthly':          [],
+  // Actions
+  'Send welcome email':         ['Welcome v2 template'],
+  'Add to newsletter tag':      ['newsletter', 'onboarding'],
+  'Wait 3 days':                ['3 days'],
+  'Branch':                     ['Has tag: active', 'AND', 'Enrolled in course'],
+  'Award completion badge':     ['Course Completion'],
+  'Send congratulations email': ['Congrats v1 template'],
+  'Add premium tag':            ['premium'],
+  'Send re-engagement email':   ['Re-engage v1', 'Subject: We miss you'],
+  'Add re-engagement tag':      ['re-engagement'],
+  'Send upsell offer email':    ['Upsell v2 template'],
+  'Add upsell-pending tag':     ['upsell-pending'],
+  'Enroll in onboarding course': ['Onboarding path 2026'],
+  'Create instructor profile':   [],
+  'Send welcome kit':            ['Instructor Kit v3'],
+  'Send upsell email':           ['Premium offer template'],
+  'Add to premium leads':        ['premium-leads'],
+  'Send birthday email':         ['Birthday template'],
+  'Issue 20% coupon':            ['BIRTHDAY20'],
+  'Send newsletter':             ['May Newsletter'],
+  'Track opens':                 [],
 }
 
-// DEV: use <StatusBadge>
-function StatusBadge({ status }: { status: RunStatus }) {
+function truncate(text: string, max: number): string {
+  return text.length > max ? text.slice(0, max - 1) + '…' : text
+}
+
+// DEV: use <Chips.SingleChip>
+function ConfigChips({ label }: { label: string }) {
+  const configs = STEP_CONFIG[label]
+
+  if (configs === undefined || configs.length === 0) {
+    return <span style={{ fontSize: 12, color: 'var(--grey4)', fontStyle: 'italic' }}>no configuration needed</span>
+  }
+
+  const visible = configs.slice(0, 2)
+  const overflow = configs.length - 2
+  const maxChars = visible.length === 1 ? 28 : 20
+
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 8px', borderRadius: 3, fontSize: 12, fontWeight: 500, whiteSpace: 'nowrap', ...statusStyle(status) }}>
-      {statusLabel(status)}
-    </span>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'nowrap', marginTop: 3 }}>
+      {visible.map((cfg, i) => (
+        <span key={i} style={{
+          display: 'inline-block',
+          padding: '2px 7px', borderRadius: 4,
+          fontSize: 12, background: 'var(--grey7)', color: 'var(--grey2)',
+          whiteSpace: 'nowrap', maxWidth: `${maxChars}ch`,
+          overflow: 'hidden', textOverflow: 'ellipsis',
+        }}>
+          {truncate(cfg, maxChars)}
+        </span>
+      ))}
+      {overflow > 0 && (
+        <span style={{ fontSize: 12, color: 'var(--grey3)', fontWeight: 500, flexShrink: 0 }}>+{overflow}</span>
+      )}
+    </div>
   )
 }
 
@@ -216,10 +266,10 @@ export default function AutomationLogsTab({ runs, statusFilter, onStatusFilterCh
                       </td>
                       <td style={{ padding: '10px 16px', verticalAlign: 'middle' }}>
                         <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--grey1)' }}>{triggerStep?.label ?? run.triggerEvent}</div>
-                        <div style={{ fontSize: 12, color: 'var(--grey3)', marginTop: 2 }}>Trigger</div>
+                        <ConfigChips label={triggerStep?.label ?? run.triggerEvent} />
                       </td>
                       <td style={{ padding: '10px 16px', verticalAlign: 'middle' }}>
-                        <StatusBadge status={run.status} />
+                        <span style={{ fontSize: 13, color: 'var(--grey2)' }}>{statusLabel(run.status)}</span>
                       </td>
                       <td style={{ padding: '10px 16px', fontSize: 12, color: 'var(--grey2)', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
                         {triggerStep ? formatDateTime(triggerStep.timestamp) : formatDateTime(run.enrolledAt)}
@@ -235,16 +285,14 @@ export default function AutomationLogsTab({ runs, statusFilter, onStatusFilterCh
                           <td style={{ padding: '8px 16px' }} />
                           <td style={{ padding: '8px 16px', verticalAlign: 'middle' }}>
                             <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--grey1)' }}>{step.label}</div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
-                              {isFailed ? (
-                                <>
-                                  <span style={{ fontSize: 12, color: 'var(--red)', fontWeight: 500 }}>{stepTypeLabel(step.type as 'action' | 'branch')} Failed</span>
-                                  {step.errorMessage && <HelpIcon message={step.errorMessage} />}
-                                </>
-                              ) : (
-                                <span style={{ fontSize: 12, color: 'var(--grey3)' }}>{stepTypeLabel(step.type as 'action' | 'branch')}</span>
-                              )}
-                            </div>
+                            {isFailed ? (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
+                                <span style={{ fontSize: 12, color: 'var(--red)', fontWeight: 500 }}>{stepTypeLabel(step.type as 'action' | 'branch')} Failed</span>
+                                {step.errorMessage && <HelpIcon message={step.errorMessage} />}
+                              </div>
+                            ) : (
+                              <ConfigChips label={step.label} />
+                            )}
                           </td>
                           <td style={{ padding: '8px 16px' }} />
                           <td style={{ padding: '8px 16px', fontSize: 12, color: 'var(--grey4)', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>{formatDateTime(step.timestamp)}</td>

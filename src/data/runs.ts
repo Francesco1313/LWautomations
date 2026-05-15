@@ -52,7 +52,9 @@ export const runs: Run[] = [
     steps: [
       { type: 'trigger', label: 'User signs up', outcome: 'success', errorMessage: null, timestamp: '2026-01-08T14:00:00Z' },
       { type: 'action', label: 'Send welcome email', outcome: 'failed', errorMessage: 'SMTP connection timed out after 30 seconds. Email provider may be unavailable.', timestamp: '2026-01-08T14:01:00Z' },
-      { type: 'action', label: 'Add to newsletter tag', outcome: 'failed', errorMessage: 'Previous step failed; action skipped.', timestamp: '2026-01-08T14:01:05Z' },
+      { type: 'action', label: 'Add to newsletter tag', outcome: 'success', errorMessage: null, timestamp: '2026-01-10T10:00:00Z' },
+      { type: 'action', label: 'Wait 3 days', outcome: 'success', errorMessage: null, timestamp: '2026-01-13T10:00:00Z' },
+      { type: 'branch', label: 'Branch', outcome: 'failed', branchPath: 'no', errorMessage: 'Condition evaluation failed: referenced field does not exist.', timestamp: '2026-01-13T10:01:00Z' },
     ],
   },
   {
@@ -464,7 +466,9 @@ export const runs: Run[] = [
     status: 'executing',
     steps: [
       { type: 'trigger', label: 'User signs up', outcome: 'success', errorMessage: null, timestamp: '2026-04-09T08:00:00Z' },
-      { type: 'action', label: 'Send welcome email', outcome: 'success', errorMessage: null, timestamp: '2026-04-09T08:00:05Z' },
+      { type: 'action', label: 'Send welcome email', outcome: 'success', errorMessage: null, timestamp: '2026-04-09T08:00:30Z' },
+      { type: 'action', label: 'Add to newsletter tag', outcome: 'success', errorMessage: null, timestamp: '2026-04-09T08:01:00Z' },
+      { type: 'action', label: 'Wait 3 days', outcome: 'success', errorMessage: null, timestamp: '2026-04-12T08:01:00Z' },
     ],
   },
   {
@@ -479,7 +483,9 @@ export const runs: Run[] = [
     status: 'failed_silent',
     steps: [
       { type: 'trigger', label: 'User signs up', outcome: 'success', errorMessage: null, timestamp: '2026-04-09T09:30:00Z' },
-      { type: 'action', label: 'Send welcome email', outcome: 'failed', errorMessage: null, timestamp: '2026-04-09T09:30:10Z' },
+      { type: 'action', label: 'Send welcome email', outcome: 'success', errorMessage: null, timestamp: '2026-04-09T09:30:30Z' },
+      { type: 'action', label: 'Add to newsletter tag', outcome: 'failed', errorMessage: null, timestamp: '2026-04-09T09:31:00Z' },
+      { type: 'branch', label: 'Branch', outcome: 'success', branchPath: 'yes', errorMessage: null, timestamp: '2026-04-09T09:31:05Z' },
     ],
   },
 ]
