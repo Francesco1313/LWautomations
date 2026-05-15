@@ -44,17 +44,17 @@ export function statusLabel(status: RunStatus): string {
 // Signup configs vary per user — picked deterministically by seed
 const SIGNUP_CONFIGS: string[][] = [
   ['LearnWorlds', 'Google', 'Apple'],
-  ['LearnWorlds'],
-  ['Google', 'Apple'],
-  ['Any'],
-  ['LearnWorlds', 'Apple'],
-  ['Google'],
+  ['LearnWorlds', 'Google', 'Apple'],
+  ['Google', 'Apple', 'LearnWorlds'],
+  ['Any', 'LearnWorlds', 'Google'],
+  ['LearnWorlds', 'Apple', 'Google'],
+  ['Google', 'LearnWorlds', 'Apple'],
 ]
 
 const STEP_CONFIG: Record<string, string[]> = {
   // Triggers — 'User signs up' handled separately with seed
   'User signs up':              [],  // overridden by seed
-  'Course completed':           ['Web Dev Bootcamp', 'UX Fundamentals'],
+  'Course completed':           ['Web Dev Bootcamp', 'UX Fundamentals', 'Python Basics'],
   'User inactive for 30 days':  [],
   'User finishes free course':  ['Free JavaScript 101'],
   'Admin manually enrolls user': [],
@@ -63,13 +63,13 @@ const STEP_CONFIG: Record<string, string[]> = {
   'Scheduled monthly':          [],
   // Actions
   'Send welcome email':         ['Welcome v2 template'],
-  'Add to newsletter tag':      ['newsletter', 'onboarding'],
+  'Add to newsletter tag':      ['newsletter', 'onboarding', 'welcome'],
   'Wait 3 days':                ['3 days'],
   'Branch':                     ['Has tag: active', 'Enrolled in course'],
   'Award completion badge':     ['Course Completion'],
   'Send congratulations email': ['Congrats v1 template'],
   'Add premium tag':            ['premium'],
-  'Send re-engagement email':   ['Re-engage v1', 'Subject: We miss you'],
+  'Send re-engagement email':   ['Re-engage v1', 'Subject: We miss you', 'Delay: 7 days'],
   'Add re-engagement tag':      ['re-engagement'],
   'Send upsell offer email':    ['Upsell v2 template'],
   'Add upsell-pending tag':     ['upsell-pending'],
@@ -122,7 +122,7 @@ function ConfigChips({ label, seed = '' }: { label: string; seed?: string }) {
         </span>
       ))}
       {overflow > 0 && (
-        <span style={{ fontSize: 12, color: 'var(--grey3)', fontWeight: 500, flexShrink: 0 }}>+{overflow}</span>
+        <span style={{ display: 'inline-block', padding: '2px 7px', borderRadius: 4, fontSize: 12, background: '#E0E0E0', color: 'var(--grey2)', whiteSpace: 'nowrap', flexShrink: 0 }}>+{overflow}</span>
       )}
     </div>
   )
