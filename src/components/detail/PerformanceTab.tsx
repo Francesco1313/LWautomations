@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { StatusFilter } from './AutomationLogsTab'
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   Legend, ResponsiveContainer,
@@ -45,9 +46,12 @@ const METRIC_ACCENT: Record<string, string> = {
   'Exited':            '#828282', // var(--grey3)
 }
 
-interface Props { runs: Run[] }
+interface Props {
+  runs: Run[]
+  onMetricClick?: (filter: StatusFilter) => void
+}
 
-export default function PerformanceTab({ runs }: Props) {
+export default function PerformanceTab({ runs, onMetricClick }: Props) {
   const [range, setRange] = useState<DateRange>('30d')
 
   const filtered = useMemo(() => {
@@ -58,11 +62,11 @@ export default function PerformanceTab({ runs }: Props) {
 
   const chartData = useMemo(() => buildChartData(filtered), [filtered])
 
-  const metrics = [
-    { label: 'Total enrolled',     value: filtered.length },
-    { label: 'Currently in-flow',  value: filtered.filter(r => r.status === 'in_progress').length },
-    { label: 'Completed',          value: filtered.filter(r => r.status === 'completed').length },
-    { label: 'Exited',             value: filtered.filter(r => r.status === 'exited').length },
+  const metrics: { label: string; value: number; filter: StatusFilter }[] = [
+    { label: 'Total enrolled',    value: filtered.length,                                                          filter: 'all' },
+    { label: 'Currently in-flow', value: filtered.filter(r => r.status === 'in_progress' || r.status === 'executing').length, filter: 'in_flow' },
+    { label: 'Completed',         value: filtered.filter(r => r.status === 'completed').length,                    filter: 'completed' },
+    { label: 'Exited',            value: filtered.filter(r => r.status === 'exited').length,                       filter: 'exited' },
   ]
 
   return (
@@ -106,25 +110,29 @@ export default function PerformanceTab({ runs }: Props) {
             background: 'white', border: '1px solid var(--grey5)', borderRadius: 6,
             marginBottom: 24, overflow: 'hidden',
           }}>
-            {metrics.map((m, i) => (
-              <div key={m.label} style={{
-                flex: 1, padding: '24px 28px', textAlign: 'center',
-                borderRight: i < metrics.length - 1 ? '1px solid var(--grey6)' : 'none',
-              }}>
-                <div style={{
-                  fontSize: 11, fontWeight: 600, color: 'var(--grey3)',
-                  textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 12,
-                }}>{m.label}</div>
-                <div style={{
-                  fontSize: 32, fontWeight: 700,
-                  color: m.value === 0
-                    ? 'var(--grey4)'
-                    : (METRIC_ACCENT[m.label] ?? 'var(--grey1)'),
-                }}>
-                  {m.value === 0 ? '—' : m.value}
+            {metrics.map((m, i) => {
+              const clickable = onMetricClick && m.value > 0
+              return (
+                <div
+                  key={m.label}
+                  onClick={() => clickable && onMetricClick(m.filter)}
+                  style={{
+                    flex: 1, padding: '24px 28px', textAlign: 'center',
+                    borderRight: i < metrics.length - 1 ? '1px solid var(--grey6)' : 'none',
+                    cursor: clickable ? 'pointer' : 'default',
+                    transition: 'background 0.1s',
+                  }}
+                  onMouseEnter={e => { if (clickable) (e.currentTarget as HTMLElement).style.background = 'var(--grey7)' }}
+                  onMouseLeave={e => { if (clickable) (e.currentTarget as HTMLElement).style.background = 'transparent' }}
+                >
+                  <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--grey3)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 12 }}>{m.label}</div>
+                  <div style={{ fontSize: 32, fontWeight: 700, color: m.value === 0 ? 'var(--grey4)' : (METRIC_ACCENT[m.label] ?? 'var(--grey1)') }}>
+                    {m.value === 0 ? '—' : m.value}
+                  </div>
+                  {clickable && <div style={{ fontSize: 11, color: 'var(--teal)', marginTop: 6 }}>View in logs →</div>}
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
 
           {/* Line chart */}

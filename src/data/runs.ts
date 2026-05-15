@@ -16,7 +16,7 @@ export interface Run {
   enrolledAt: string
   triggerEvent: string
   reentryRule: string
-  status: 'completed' | 'in_progress' | 'failed' | 'exited'
+  status: 'completed' | 'in_progress' | 'executing' | 'failed' | 'failed_silent' | 'exited'
   steps: Step[]
 }
 
@@ -450,6 +450,36 @@ export const runs: Run[] = [
       { type: 'trigger', label: 'User signs up', outcome: 'success', errorMessage: null, timestamp: '2026-04-08T10:30:00Z' },
       { type: 'action', label: 'Send welcome email', outcome: 'failed', errorMessage: 'Message size exceeds the maximum allowed by the recipient mail server.', timestamp: '2026-04-08T10:31:00Z' },
       { type: 'action', label: 'Add to newsletter tag', outcome: 'failed', errorMessage: 'Previous step failed; action skipped.', timestamp: '2026-04-08T10:31:05Z' },
+    ],
+  },
+  {
+    id: 'run-s1',
+    automationId: 'auto-001',
+    userId: 'user-007',
+    userName: 'Martina Ricci',
+    userEmail: 'martina.ricci@example.com',
+    enrolledAt: '2026-04-09T08:00:00Z',
+    triggerEvent: 'User signs up',
+    reentryRule: 'Once per user',
+    status: 'executing',
+    steps: [
+      { type: 'trigger', label: 'User signs up', outcome: 'success', errorMessage: null, timestamp: '2026-04-09T08:00:00Z' },
+      { type: 'action', label: 'Send welcome email', outcome: 'success', errorMessage: null, timestamp: '2026-04-09T08:00:05Z' },
+    ],
+  },
+  {
+    id: 'run-s2',
+    automationId: 'auto-001',
+    userId: 'user-008',
+    userName: 'Paolo Conti',
+    userEmail: 'paolo.conti@example.com',
+    enrolledAt: '2026-04-09T09:30:00Z',
+    triggerEvent: 'User signs up',
+    reentryRule: 'Once per user',
+    status: 'failed_silent',
+    steps: [
+      { type: 'trigger', label: 'User signs up', outcome: 'success', errorMessage: null, timestamp: '2026-04-09T09:30:00Z' },
+      { type: 'action', label: 'Send welcome email', outcome: 'failed', errorMessage: null, timestamp: '2026-04-09T09:30:10Z' },
     ],
   },
 ]
