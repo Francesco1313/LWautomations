@@ -190,6 +190,8 @@ export default function AutomationLogsTab({ runs, statusFilter, onStatusFilterCh
     }), [sortedRuns, statusFilter, errorsOnly, eventFilter, search]
   )
 
+  const [allExpanded, setAllExpanded] = useState(false)
+
   const toggleExpand = (runId: string) => {
     setExpandedRunIds(prev => {
       const next = new Set(prev)
@@ -197,6 +199,16 @@ export default function AutomationLogsTab({ runs, statusFilter, onStatusFilterCh
       else next.add(runId)
       return next
     })
+  }
+
+  const toggleExpandAll = () => {
+    if (allExpanded) {
+      setExpandedRunIds(new Set())
+      setAllExpanded(false)
+    } else {
+      setExpandedRunIds(new Set(filtered.map(r => r.id)))
+      setAllExpanded(true)
+    }
   }
 
   return (
@@ -215,6 +227,29 @@ export default function AutomationLogsTab({ runs, statusFilter, onStatusFilterCh
           <input type="checkbox" checked={errorsOnly} onChange={e => setErrorsOnly(e.target.checked)} style={{ accentColor: 'var(--red)', width: 13, height: 13 }} />
           Errors only
         </label>
+        {/* Expand / Collapse all — DEV: use <IconButton label="Expand all rows"> */}
+        <button
+          onClick={toggleExpandAll}
+          style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 10px', border: '1px solid var(--grey5)', borderRadius: 4, background: 'white', fontSize: 13, color: 'var(--grey2)', cursor: 'pointer', userSelect: 'none' }}
+        >
+          {allExpanded ? (
+            <>
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                <path d="M2 5L5 2M5 2H2M5 2V5" /><path d="M9 5L12 2M12 2H9M12 2V5" />
+                <path d="M2 9L5 12M5 12H2M5 12V9" /><path d="M9 9L12 12M12 12H9M12 12V9" />
+              </svg>
+              Collapse all rows
+            </>
+          ) : (
+            <>
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                <path d="M5 2L2 5M2 5H5M2 5V2" /><path d="M12 2L9 5M9 5H12M9 5V2" />
+                <path d="M5 12L2 9M2 9H5M2 9V12" /><path d="M12 12L9 9M9 9H12M9 9V12" />
+              </svg>
+              Expand all rows
+            </>
+          )}
+        </button>
         {/* Status filter */}
         <select
           value={statusFilter}
