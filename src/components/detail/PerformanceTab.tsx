@@ -41,9 +41,11 @@ function buildChartData(runs: Run[]) {
 }
 
 const METRIC_ACCENT: Record<string, string> = {
-  'Currently in-flow': '#FB8C00', // var(--in-progress)
-  'Completed':         '#52A62B', // var(--completed)
-  'Exited':            '#828282', // var(--grey3)
+  'In flow':              '#FB8C00',
+  'Fulfilled':            '#52A62B',
+  'Exit condition':       '#828282',
+  'Failed':               '#E53935',
+  'Failed silently':      '#BDBDBD',
 }
 
 interface Props {
@@ -63,10 +65,12 @@ export default function PerformanceTab({ runs, onMetricClick }: Props) {
   const chartData = useMemo(() => buildChartData(filtered), [filtered])
 
   const metrics: { label: string; value: number; filter: StatusFilter }[] = [
-    { label: 'Total enrolled',    value: filtered.length,                                                          filter: 'all' },
-    { label: 'Currently in-flow', value: filtered.filter(r => r.status === 'in_progress' || r.status === 'executing').length, filter: 'in_flow' },
-    { label: 'Completed',         value: filtered.filter(r => r.status === 'completed').length,                    filter: 'completed' },
-    { label: 'Exited',            value: filtered.filter(r => r.status === 'exited').length,                       filter: 'exited' },
+    { label: 'Total enrolled',  value: filtered.length,                                                                          filter: 'all' },
+    { label: 'In flow',         value: filtered.filter(r => r.status === 'in_progress' || r.status === 'executing').length,      filter: 'in_flow' },
+    { label: 'Fulfilled',       value: filtered.filter(r => r.status === 'completed').length,                                    filter: 'completed' },
+    { label: 'Exit condition',  value: filtered.filter(r => r.status === 'exited').length,                                       filter: 'exited' },
+    { label: 'Failed',          value: filtered.filter(r => r.status === 'failed').length,                                       filter: 'failed' },
+    { label: 'Failed silently', value: filtered.filter(r => r.status === 'failed_silent').length,                                filter: 'failed_silent' },
   ]
 
   return (
