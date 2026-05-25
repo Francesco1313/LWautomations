@@ -1,10 +1,15 @@
 export interface Step {
-  type: 'trigger' | 'action' | 'completion' | 'branch'
+  type: 'trigger' | 'action' | 'completion' | 'branch' | 'delay'
   label: string
   outcome: 'success' | 'failed'
   branchPath?: 'yes' | 'no'
   errorMessage: string | null
   timestamp: string
+  delayVariant?: string
+  waitingText?: string
+  isCurrentStep?: boolean
+  canAdvance?: boolean
+  advancedManually?: boolean
 }
 
 export interface Run {
@@ -486,6 +491,87 @@ export const runs: Run[] = [
       { type: 'action', label: 'Send welcome email', outcome: 'success', errorMessage: null, timestamp: '2026-04-09T09:30:30Z' },
       { type: 'action', label: 'Add to newsletter tag', outcome: 'failed', errorMessage: null, timestamp: '2026-04-09T09:31:00Z' },
       { type: 'branch', label: 'Branch', outcome: 'success', branchPath: 'yes', errorMessage: null, timestamp: '2026-04-09T09:31:05Z' },
+    ],
+  },
+  // Delay variant runs — Option B prototype
+  {
+    id: 'run-d01',
+    automationId: 'auto-001',
+    userId: 'user-005',
+    userName: 'Martina Ricci',
+    userEmail: 'martina.ricci@example.com',
+    enrolledAt: '2026-04-20T09:00:00Z',
+    triggerEvent: 'User signs up',
+    reentryRule: 'Once per user',
+    status: 'in_progress',
+    steps: [
+      { type: 'trigger', label: 'User signs up', outcome: 'success', errorMessage: null, timestamp: '2026-04-20T09:00:00Z' },
+      { type: 'action', label: 'Send welcome email', outcome: 'success', errorMessage: null, timestamp: '2026-04-20T09:00:30Z' },
+      { type: 'delay', label: 'Delay', outcome: 'success', errorMessage: null, timestamp: '2026-04-20T09:01:00Z', delayVariant: 'wait_until_specific_moment', waitingText: 'Currently waiting until 20 Oct 2025, 01:15 pm', isCurrentStep: true, canAdvance: true, advancedManually: false },
+    ],
+  },
+  {
+    id: 'run-d02',
+    automationId: 'auto-002',
+    userId: 'user-006',
+    userName: 'Elena Conti',
+    userEmail: 'elena.conti@example.com',
+    enrolledAt: '2026-04-21T10:00:00Z',
+    triggerEvent: 'Course completed',
+    reentryRule: 'Once per course',
+    status: 'in_progress',
+    steps: [
+      { type: 'trigger', label: 'Course completed', outcome: 'success', errorMessage: null, timestamp: '2026-04-21T10:00:00Z' },
+      { type: 'action', label: 'Award completion badge', outcome: 'success', errorMessage: null, timestamp: '2026-04-21T10:00:10Z' },
+      { type: 'delay', label: 'Delay', outcome: 'success', errorMessage: null, timestamp: '2026-04-21T10:01:00Z', delayVariant: 'wait_until_time_of_day', waitingText: 'Currently waiting until the next 01:15 pm', isCurrentStep: true, canAdvance: true, advancedManually: false },
+    ],
+  },
+  {
+    id: 'run-d03',
+    automationId: 'auto-005',
+    userId: 'user-007',
+    userName: 'Giulia Ferri',
+    userEmail: 'giulia.ferri@example.com',
+    enrolledAt: '2026-04-22T08:30:00Z',
+    triggerEvent: 'User inactive for 30 days',
+    reentryRule: 'Once every 30 days',
+    status: 'in_progress',
+    steps: [
+      { type: 'trigger', label: 'User inactive for 30 days', outcome: 'success', errorMessage: null, timestamp: '2026-04-22T08:30:00Z' },
+      { type: 'action', label: 'Send re-engagement email', outcome: 'success', errorMessage: null, timestamp: '2026-04-22T08:30:30Z' },
+      { type: 'delay', label: 'Delay', outcome: 'success', errorMessage: null, timestamp: '2026-04-22T08:31:00Z', delayVariant: 'wait_until_day_of_week', waitingText: 'Currently waiting until Monday at 01:15 pm', isCurrentStep: true, canAdvance: true, advancedManually: false },
+    ],
+  },
+  {
+    id: 'run-d04',
+    automationId: 'auto-007',
+    userId: 'user-003',
+    userName: 'Sofia Esposito',
+    userEmail: 'sofia.esposito@example.com',
+    enrolledAt: '2026-04-23T11:00:00Z',
+    triggerEvent: 'User finishes free course',
+    reentryRule: 'Once per user',
+    status: 'in_progress',
+    steps: [
+      { type: 'trigger', label: 'User finishes free course', outcome: 'success', errorMessage: null, timestamp: '2026-04-23T11:00:00Z' },
+      { type: 'action', label: 'Send upsell offer email', outcome: 'success', errorMessage: null, timestamp: '2026-04-23T11:00:10Z' },
+      { type: 'delay', label: 'Delay', outcome: 'success', errorMessage: null, timestamp: '2026-04-23T11:01:00Z', delayVariant: 'wait_for_duration_from_field', waitingText: 'Currently waiting for the duration set in the custom user field', isCurrentStep: true, canAdvance: true, advancedManually: false },
+    ],
+  },
+  {
+    id: 'run-d05',
+    automationId: 'auto-001',
+    userId: 'user-004',
+    userName: 'Luca Ferrari',
+    userEmail: 'luca.ferrari@example.com',
+    enrolledAt: '2026-04-24T14:00:00Z',
+    triggerEvent: 'User signs up',
+    reentryRule: 'Once per user',
+    status: 'in_progress',
+    steps: [
+      { type: 'trigger', label: 'User signs up', outcome: 'success', errorMessage: null, timestamp: '2026-04-24T14:00:00Z' },
+      { type: 'action', label: 'Add to newsletter tag', outcome: 'success', errorMessage: null, timestamp: '2026-04-24T14:00:10Z' },
+      { type: 'delay', label: 'Delay', outcome: 'success', errorMessage: null, timestamp: '2026-04-24T14:01:00Z', delayVariant: 'wait_until_moment_from_field', waitingText: 'Currently waiting until the date set in the custom user field', isCurrentStep: true, canAdvance: true, advancedManually: false },
     ],
   },
 ]
