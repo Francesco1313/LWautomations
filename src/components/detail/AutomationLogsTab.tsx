@@ -367,11 +367,18 @@ export default function AutomationLogsTab({ runs, statusFilter, onStatusFilterCh
                               // DEV: use <AutomationControlRow> or equivalent admin UI component
                               <div>
                                 <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--grey1)' }}>Delay</div>
-                                <div style={{ fontSize: 12, color: 'var(--grey3)', marginTop: 2 }}>
-                                  {isAdvanced
-                                    ? 'Advanced manually'
-                                    : (step.waitingText ?? 'Currently waiting in this delay')}
-                                </div>
+                                {isAdvanced ? (
+                                  <div style={{ fontSize: 12, color: 'var(--grey3)', marginTop: 2 }}>Advanced manually</div>
+                                ) : step.waitingPrefix ? (
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap', marginTop: 4 }}>
+                                    <span style={{ fontSize: 12, color: 'var(--grey3)' }}>{step.waitingPrefix}</span>
+                                    {step.waitingChips?.map((chip, ci) => (
+                                      <span key={ci} style={{ display: 'inline-block', padding: '2px 7px', borderRadius: 4, fontSize: 12, background: '#E0E0E0', color: 'var(--grey2)', whiteSpace: 'nowrap' }}>{chip}</span>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <div style={{ fontSize: 12, color: 'var(--grey3)', marginTop: 2 }}>Currently waiting in this delay</div>
+                                )}
                                 {/* DEV: use <Button variant="secondary"> or <TextButton> */}
                                 {canShowCTA && (
                                   <button
