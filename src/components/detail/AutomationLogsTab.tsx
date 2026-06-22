@@ -149,8 +149,11 @@ function stepTypeLabel(type: 'action' | 'branch' | 'delay'): string {
   return type === 'branch' ? 'Automation control' : 'Action'
 }
 
+type DelayActionKind = 'advance' | 'end'
+
 // DEV: use <Modal> / <Dialog> from admin UI library
-function AdvanceModal({ learnerName, onCancel, onConfirm }: { learnerName: string | null; onCancel: () => void; onConfirm: () => void }) {
+function ConfirmModal({ action, learnerName, onCancel, onConfirm }: { action: DelayActionKind; learnerName: string | null; onCancel: () => void; onConfirm: () => void }) {
+  const who = learnerName ? <strong>{learnerName}</strong> : 'this learner'
   return (
     <div
       style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -158,13 +161,18 @@ function AdvanceModal({ learnerName, onCancel, onConfirm }: { learnerName: strin
     >
       <div style={{ background: 'white', borderRadius: 8, padding: '32px 36px', width: 460, maxWidth: '90vw', boxShadow: '0 8px 32px rgba(0,0,0,0.18)' }}>
         <h2 style={{ fontSize: 18, fontWeight: 600, color: 'var(--grey1)', margin: '0 0 16px' }}>
-          Advance this user to the next step?
+          {action === 'advance' ? 'Advance this user to the next step?' : 'End the automation for this user?'}
         </h2>
-        <p style={{ fontSize: 14, color: 'var(--grey2)', lineHeight: 1.6, margin: '0 0 8px' }}>
-          This will end the current delay for{' '}
-          {learnerName ? <strong>{learnerName}</strong> : 'this learner'} only.
-          The next step will run immediately using the current automation setup.
-        </p>
+        {action === 'advance' ? (
+          <p style={{ fontSize: 14, color: 'var(--grey2)', lineHeight: 1.6, margin: '0 0 8px' }}>
+            This will end the current delay for {who} only.
+            The next step will run immediately using the current automation setup.
+          </p>
+        ) : (
+          <p style={{ fontSize: 14, color: 'var(--grey2)', lineHeight: 1.6, margin: '0 0 8px' }}>
+            This will end the automation for {who} now. No further steps will run for this learner.
+          </p>
+        )}
         <p style={{ fontSize: 14, color: 'var(--grey3)', margin: '0 0 28px' }}>This action cannot be undone.</p>
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
           {/* DEV: use <Button variant="ghost"> */}
@@ -176,7 +184,7 @@ function AdvanceModal({ learnerName, onCancel, onConfirm }: { learnerName: strin
           <button
             onClick={onConfirm}
             style={{ height: 34, padding: '0 16px', borderRadius: 4, border: 'none', background: 'var(--teal)', fontSize: 13, fontWeight: 500, color: 'white', cursor: 'pointer' }}
-          >Advance now</button>
+          >{action === 'advance' ? 'Advance now' : 'End automation'}</button>
         </div>
       </div>
     </div>
@@ -195,7 +203,8 @@ export default function AutomationLogsTab({ runs, statusFilter, onStatusFilterCh
   const [errorsOnly, setErrorsOnly] = useState(false)
   const [eventFilter, setEventFilter] = useState<string>('all')
   const [advancedDelays, setAdvancedDelays] = useState<Set<string>>(new Set())
-  const [modalTarget, setModalTarget] = useState<{ stepKey: string; learnerName: string | null } | null>(null)
+  const [endedRunIds, setEndedRunIds] = useState<Set<string>>(new Set())
+  const [modalTarget, setModalTarget] = useState<{ action: DelayActionKind; stepKey: string; runId: string; learnerName: string | null } | null>(null)
 
   const sortedRuns = useMemo(() =>
     [...runs].sort((a, b) => {
@@ -304,7 +313,7 @@ export default function AutomationLogsTab({ runs, statusFilter, onStatusFilterCh
           </colgroup>
           <thead>
             <tr style={{ background: 'var(--cool-grey)', borderBottom: '1px solid var(--grey5)' }}>
-              {['Contact', 'Event', 'Status', 'Time'].map(col => (
+              {['Contact', 'Event', 'Automation status', 'Time'].map(col => (
                 <th key={col} style={{ padding: '10px 16px', textAlign: 'left', fontSize: 11, fontWeight: 600, color: 'var(--grey3)', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>{col}</th>
               ))}
             </tr>
@@ -339,11 +348,12 @@ export default function AutomationLogsTab({ runs, statusFilter, onStatusFilterCh
                         </div>
                       </td>
                       <td style={{ padding: '10px 16px', verticalAlign: 'middle' }}>
+                        <div style={{ fontSize: 11, color: 'var(--grey3)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 2 }}>Automation started with</div>
                         <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--grey1)' }}>{triggerStep?.label ?? run.triggerEvent}</div>
                         <ConfigChips label={triggerStep?.label ?? run.triggerEvent} seed={run.userId} />
                       </td>
                       <td style={{ padding: '10px 16px', verticalAlign: 'middle' }}>
-                        <span style={{ fontSize: 13, color: 'var(--grey2)' }}>{statusLabel(run.status)}</span>
+                        <span style={{ fontSize: 13, color: 'var(--grey2)' }}>{endedRunIds.has(run.id) ? statusLabel('exited') : statusLabel(run.status)}</span>
                       </td>
                       <td style={{ padding: '10px 16px', fontSize: 12, color: 'var(--grey2)', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
                         {triggerStep ? formatDateTime(triggerStep.timestamp) : formatDateTime(run.enrolledAt)}
@@ -357,7 +367,8 @@ export default function AutomationLogsTab({ runs, statusFilter, onStatusFilterCh
                       const isDelay = step.type === 'delay'
                       const stepKey = `${run.id}-${idx}`
                       const isAdvanced = advancedDelays.has(stepKey)
-                      const isActiveRun = run.status === 'in_progress' || run.status === 'executing'
+                      const isEnded = endedRunIds.has(run.id)
+                      const isActiveRun = (run.status === 'in_progress' || run.status === 'executing') && !isEnded
                       const canShowCTA = isDelay && step.canAdvance && !isAdvanced && !step.advancedManually && isActiveRun
                       return (
                         <tr key={stepKey} style={{ borderBottom: isLast ? '2px solid var(--grey5)' : '1px solid var(--grey6)', background: 'var(--grey7)' }}>
@@ -367,7 +378,9 @@ export default function AutomationLogsTab({ runs, statusFilter, onStatusFilterCh
                               // DEV: use <AutomationControlRow> or equivalent admin UI component
                               <div>
                                 <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--grey1)' }}>Delay</div>
-                                {isAdvanced ? (
+                                {isEnded ? (
+                                  <div style={{ fontSize: 12, color: 'var(--grey3)', marginTop: 2 }}>Automation ended manually</div>
+                                ) : isAdvanced ? (
                                   <div style={{ fontSize: 12, color: 'var(--grey3)', marginTop: 2 }}>Advanced manually</div>
                                 ) : step.waitingPrefix ? (
                                   <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap', marginTop: 4 }}>
@@ -379,12 +392,19 @@ export default function AutomationLogsTab({ runs, statusFilter, onStatusFilterCh
                                 ) : (
                                   <div style={{ fontSize: 12, color: 'var(--grey3)', marginTop: 2 }}>Currently waiting in this delay</div>
                                 )}
-                                {/* DEV: use <Button variant="secondary"> or <TextButton> */}
                                 {canShowCTA && (
-                                  <button
-                                    onClick={() => setModalTarget({ stepKey, learnerName: run.userName })}
-                                    style={{ marginTop: 6, height: 28, padding: '0 12px', borderRadius: 4, border: '1px solid var(--teal)', background: 'white', fontSize: 12, color: 'var(--teal)', fontWeight: 500, cursor: 'pointer' }}
-                                  >Advance to next step</button>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 6 }}>
+                                    {/* DEV: use <ButtonLink> / <TextButton> */}
+                                    <button
+                                      onClick={() => setModalTarget({ action: 'advance', stepKey, runId: run.id, learnerName: run.userName })}
+                                      style={{ height: 20, padding: 0, border: 'none', background: 'none', fontSize: 12, color: 'var(--teal)', fontWeight: 500, cursor: 'pointer', textDecoration: 'underline' }}
+                                    >Move to the next step</button>
+                                    {/* DEV: use <ButtonLink> / <TextButton> */}
+                                    <button
+                                      onClick={() => setModalTarget({ action: 'end', stepKey, runId: run.id, learnerName: run.userName })}
+                                      style={{ height: 20, padding: 0, border: 'none', background: 'none', fontSize: 12, color: 'var(--teal)', fontWeight: 500, cursor: 'pointer', textDecoration: 'underline' }}
+                                    >End the automation</button>
+                                  </div>
                                 )}
                               </div>
                             ) : (
@@ -415,11 +435,16 @@ export default function AutomationLogsTab({ runs, statusFilter, onStatusFilterCh
       </div>
 
       {modalTarget && (
-        <AdvanceModal
+        <ConfirmModal
+          action={modalTarget.action}
           learnerName={modalTarget.learnerName}
           onCancel={() => setModalTarget(null)}
           onConfirm={() => {
-            setAdvancedDelays(prev => new Set(prev).add(modalTarget.stepKey))
+            if (modalTarget.action === 'advance') {
+              setAdvancedDelays(prev => new Set(prev).add(modalTarget.stepKey))
+            } else {
+              setEndedRunIds(prev => new Set(prev).add(modalTarget.runId))
+            }
             setModalTarget(null)
           }}
         />
