@@ -348,8 +348,10 @@ export default function AutomationLogsTab({ runs, statusFilter, onStatusFilterCh
                         </div>
                       </td>
                       <td style={{ padding: '10px 16px', verticalAlign: 'middle' }}>
-                        <div style={{ fontSize: 11, color: 'var(--grey3)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 2 }}>Automation started with</div>
-                        <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--grey1)' }}>{triggerStep?.label ?? run.triggerEvent}</div>
+                        <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--grey1)' }}>
+                          <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--grey3)' }}>Starting trigger: </span>
+                          {triggerStep?.label ?? run.triggerEvent}
+                        </div>
                         <ConfigChips label={triggerStep?.label ?? run.triggerEvent} seed={run.userId} />
                       </td>
                       <td style={{ padding: '10px 16px', verticalAlign: 'middle' }}>
